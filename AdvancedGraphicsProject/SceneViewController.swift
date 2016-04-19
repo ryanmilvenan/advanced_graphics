@@ -9,7 +9,7 @@
 import UIKit
 import Metal
 import MetalKit
-import GLKit
+import simd
 
 let MaxBuffers = 3
 let ConstantBufferSize = 1024*1024
@@ -21,60 +21,147 @@ class SceneViewController:UIViewController, MTKViewDelegate {
     
     var commandQueue: MTLCommandQueue! = nil
     var pipelineState: MTLRenderPipelineState! = nil
-    var scene: Node? = nil
+    var defaultLibrary: MTLLibrary! = nil
+    var depthState: MTLDepthStencilState! = nil
     
+    var meshes:[Mesh] = []
+    var frameUniformBuffers:[MTLBuffer] = []
     
     let inflightSemaphore = dispatch_semaphore_create(MaxBuffers)
     var bufferIndex = 0
     
-    // offsets used in animation
-    var xOffset:[Float] = [ -1.0, 1.0, -1.0 ]
-    var yOffset:[Float] = [ 1.0, 0.0, -1.0 ]
-    var xDelta:[Float] = [ 0.002, -0.001, 0.003 ]
-    var yDelta:[Float] = [ 0.001,  0.002, -0.001 ]
+    var projectionMatrix:matrix_float4x4! = nil
+    var viewMatrix:matrix_float4x4! = nil
     
     override func viewDidLoad() {
         
         super.viewDidLoad()
         
+        self.setupMetal();
+        self.setupView();
+        self.loadAssets();
+        self.reshape();
+    }
+    
+    func setupMetal() {
         device = MTLCreateSystemDefaultDevice()
         guard device != nil else { // Fallback to a blank UIView, an application could also fallback to OpenGL ES here.
             print("Metal is not supported on this device")
             self.view = UIView(frame: self.view.frame)
             return
         }
-
+        
+        commandQueue = device.newCommandQueue()
+        commandQueue.label = "main command queue"
+        
+        defaultLibrary = device.newDefaultLibrary()!
+    }
+    
+    func setupView() {
         // setup view properties
         let view = self.view as! MTKView
         view.device = device
         view.delegate = self
         
-        loadAssets()
+        view.sampleCount = 4
+        view.depthStencilPixelFormat = MTLPixelFormat.Depth32Float_Stencil8
+    }
+    
+    func reshape() {
+        
     }
     
     func loadAssets() {
         
         // load any resources required for rendering
         let view = self.view as! MTKView
-        commandQueue = device.newCommandQueue()
-        commandQueue.label = "main command queue"
-        
-        let defaultLibrary = device.newDefaultLibrary()!
+
         let fragmentProgram = defaultLibrary.newFunctionWithName("passThroughFragment")!
         let vertexProgram = defaultLibrary.newFunctionWithName("passThroughVertex")!
         
+        let meshVertexBufferIdx:Int = BufferIndex.MeshVertexBuffer.rawValue
+        
+        //Position
+        let mtlVertexDescriptor:MTLVertexDescriptor = MTLVertexDescriptor()
+        let vertexAttributePosition:Int = VertexAttributes.VertexAttributePosition.rawValue
+        mtlVertexDescriptor.attributes[vertexAttributePosition].format = MTLVertexFormat.Float3
+        mtlVertexDescriptor.attributes[vertexAttributePosition].offset = 0
+        mtlVertexDescriptor.attributes[vertexAttributePosition].bufferIndex = meshVertexBufferIdx
+        
+        //Normals
+        let normalAttributePosition:Int = VertexAttributes.VertexAttributeNormal.rawValue
+        mtlVertexDescriptor.attributes[normalAttributePosition].format = MTLVertexFormat.Float3
+        mtlVertexDescriptor.attributes[normalAttributePosition].offset = 12
+        mtlVertexDescriptor.attributes[normalAttributePosition].bufferIndex = meshVertexBufferIdx
+        
+        //Texture Coords
+        let texcoordAttribute:Int = VertexAttributes.VertexAttributeTexcoord.rawValue
+        mtlVertexDescriptor.attributes[texcoordAttribute].format = MTLVertexFormat.Half2
+        mtlVertexDescriptor.attributes[texcoordAttribute].offset = 24
+        mtlVertexDescriptor.attributes[texcoordAttribute].bufferIndex = meshVertexBufferIdx
+        
+        //Interleaved Buffer
+        mtlVertexDescriptor.layouts[meshVertexBufferIdx].stride = 28
+        mtlVertexDescriptor.layouts[meshVertexBufferIdx].stepRate = 1
+        mtlVertexDescriptor.layouts[meshVertexBufferIdx].stepFunction = MTLVertexStepFunction.PerVertex
+        
         let pipelineStateDescriptor = MTLRenderPipelineDescriptor()
+        pipelineStateDescriptor.label = "Main Pipeline"
+        pipelineStateDescriptor.sampleCount = view.sampleCount
         pipelineStateDescriptor.vertexFunction = vertexProgram
         pipelineStateDescriptor.fragmentFunction = fragmentProgram
+        pipelineStateDescriptor.vertexDescriptor = mtlVertexDescriptor
         pipelineStateDescriptor.colorAttachments[0].pixelFormat = view.colorPixelFormat
-        pipelineStateDescriptor.sampleCount = view.sampleCount
+        pipelineStateDescriptor.depthAttachmentPixelFormat = view.depthStencilPixelFormat
+        pipelineStateDescriptor.stencilAttachmentPixelFormat = view.depthStencilPixelFormat
         
         do {
             try pipelineState = device.newRenderPipelineStateWithDescriptor(pipelineStateDescriptor)
         } catch let error {
             print("Failed to create pipeline state, error \(error)")
         }
+        
+        let depthStateDescriptor:MTLDepthStencilDescriptor = MTLDepthStencilDescriptor()
+        depthStateDescriptor.depthCompareFunction = MTLCompareFunction.Less
+        depthStateDescriptor.depthWriteEnabled = true
+        depthState = device.newDepthStencilStateWithDescriptor(depthStateDescriptor)
+        
+        let mdlVertexDescriptor:MDLVertexDescriptor = MTKModelIOVertexDescriptorFromMetal(mtlVertexDescriptor)
+        (mdlVertexDescriptor.attributes[vertexAttributePosition] as! MDLVertexAttribute).name = MDLVertexAttributePosition
+        (mdlVertexDescriptor.attributes[normalAttributePosition] as! MDLVertexAttribute).name = MDLVertexAttributeNormal
+        (mdlVertexDescriptor.attributes[texcoordAttribute] as! MDLVertexAttribute).name = MDLVertexAttributeTextureCoordinate
+        
+        let bufferAllocator:MTKMeshBufferAllocator = MTKMeshBufferAllocator(device: self.device)
+        let assetURL:NSURL = NSBundle.mainBundle().URLForResource("some location", withExtension: nil)!
+        
+        let asset:MDLAsset = MDLAsset(URL: assetURL, vertexDescriptor: mdlVertexDescriptor, bufferAllocator: bufferAllocator)
+        
+        var mtkMeshes:NSArray?
+        var mdlMeshes:NSArray?
+        
+        do {
+            mtkMeshes = try MTKMesh.newMeshesFromAsset(asset, device: device, sourceMeshes: &mdlMeshes)
+        } catch {
+            print("Failed to create mesh")
+            return
+        }
 
+        meshes = []
+        for index in 0 ..< mtkMeshes!.count {
+            let mtkMesh: MTKMesh = mtkMeshes![index] as! MTKMesh
+            let mdlMesh: MDLMesh = mdlMeshes![index] as! MDLMesh
+            let newMesh = Mesh(mtkMesh: mtkMesh, mdlMesh: mdlMesh, device: device)
+            
+            meshes.append(newMesh)
+        }
+        
+        for _ in 0 ..< MaxBuffers {
+            frameUniformBuffers.append(device.newBufferWithLength(
+                sizeof(FrameUniforms),
+                options: MTLResourceOptions.CPUCacheModeDefaultCache
+                ))
+        }
+        
     }
     
     func drawInMTKView(view: MTKView) {
@@ -101,7 +188,6 @@ class SceneViewController:UIViewController, MTKViewDelegate {
             renderEncoder.label = "render encoder"
             
             renderEncoder.pushDebugGroup("draw scene")
-            scene?.renderWithParentModelViewMatrix(GLKMatrix4Identity, commandBuffer: commandBuffer, pipelineState: pipelineState, renderPassDescriptor: renderPassDescriptor, drawable: currentDrawable)
             renderEncoder.popDebugGroup()
             renderEncoder.endEncoding()
                 
