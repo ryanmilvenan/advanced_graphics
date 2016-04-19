@@ -17,9 +17,11 @@
 		A20AB2D71CBEDB24008DBB60 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = A20AB2D51CBEDB24008DBB60 /* LaunchScreen.storyboard */; };
 		A20AB2E21CBEDB25008DBB60 /* AdvancedGraphicsProjectTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20AB2E11CBEDB25008DBB60 /* AdvancedGraphicsProjectTests.swift */; };
 		A20AB2ED1CBEDB25008DBB60 /* AdvancedGraphicsProjectUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20AB2EC1CBEDB25008DBB60 /* AdvancedGraphicsProjectUITests.swift */; };
-		A20AB2FB1CBF6CA2008DBB60 /* ShaderTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20AB2FA1CBF6CA2008DBB60 /* ShaderTypes.swift */; };
 		A26757BD1CC6CCF6001DC1D1 /* Submesh.swift in Sources */ = {isa = PBXBuildFile; fileRef = A26757BC1CC6CCF5001DC1D1 /* Submesh.swift */; };
 		A26757BF1CC6CD00001DC1D1 /* Mesh.swift in Sources */ = {isa = PBXBuildFile; fileRef = A26757BE1CC6CD00001DC1D1 /* Mesh.swift */; };
+		A26757C11CC6DB74001DC1D1 /* Math.swift in Sources */ = {isa = PBXBuildFile; fileRef = A26757C01CC6DB74001DC1D1 /* Math.swift */; };
+		A26757C31CC6DDA4001DC1D1 /* ShaderTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = A26757C21CC6DDA4001DC1D1 /* ShaderTypes.swift */; };
+		A26757C51CC6DE26001DC1D1 /* models in Resources */ = {isa = PBXBuildFile; fileRef = A26757C41CC6DE26001DC1D1 /* models */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -56,9 +58,11 @@
 		A20AB2E81CBEDB25008DBB60 /* AdvancedGraphicsProjectUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AdvancedGraphicsProjectUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		A20AB2EC1CBEDB25008DBB60 /* AdvancedGraphicsProjectUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvancedGraphicsProjectUITests.swift; sourceTree = "<group>"; };
 		A20AB2EE1CBEDB25008DBB60 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		A20AB2FA1CBF6CA2008DBB60 /* ShaderTypes.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ShaderTypes.swift; path = ../ShaderTypes.swift; sourceTree = "<group>"; };
 		A26757BC1CC6CCF5001DC1D1 /* Submesh.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Submesh.swift; sourceTree = "<group>"; };
 		A26757BE1CC6CD00001DC1D1 /* Mesh.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Mesh.swift; sourceTree = "<group>"; };
+		A26757C01CC6DB74001DC1D1 /* Math.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Math.swift; sourceTree = "<group>"; };
+		A26757C21CC6DDA4001DC1D1 /* ShaderTypes.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ShaderTypes.swift; sourceTree = "<group>"; };
+		A26757C41CC6DE26001DC1D1 /* models */ = {isa = PBXFileReference; lastKnownFileType = folder; path = models; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -109,9 +113,11 @@
 		A20AB2C91CBEDB24008DBB60 /* AdvancedGraphicsProject */ = {
 			isa = PBXGroup;
 			children = (
-				A20AB2FA1CBF6CA2008DBB60 /* ShaderTypes.swift */,
+				A26757C41CC6DE26001DC1D1 /* models */,
+				A26757C21CC6DDA4001DC1D1 /* ShaderTypes.swift */,
 				A20AB2CA1CBEDB24008DBB60 /* AppDelegate.swift */,
 				A20AB2CC1CBEDB24008DBB60 /* SceneViewController.swift */,
+				A26757C01CC6DB74001DC1D1 /* Math.swift */,
 				A26757BC1CC6CCF5001DC1D1 /* Submesh.swift */,
 				A26757BE1CC6CD00001DC1D1 /* Mesh.swift */,
 				A20AB2CE1CBEDB24008DBB60 /* Shaders.metal */,
@@ -252,6 +258,7 @@
 			files = (
 				A20AB2D71CBEDB24008DBB60 /* LaunchScreen.storyboard in Resources */,
 				A20AB2D41CBEDB24008DBB60 /* Assets.xcassets in Resources */,
+				A26757C51CC6DE26001DC1D1 /* models in Resources */,
 				A20AB2D21CBEDB24008DBB60 /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -277,12 +284,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A20AB2FB1CBF6CA2008DBB60 /* ShaderTypes.swift in Sources */,
 				A20AB2CF1CBEDB24008DBB60 /* Shaders.metal in Sources */,
+				A26757C11CC6DB74001DC1D1 /* Math.swift in Sources */,
 				A26757BF1CC6CD00001DC1D1 /* Mesh.swift in Sources */,
 				A20AB2CD1CBEDB24008DBB60 /* SceneViewController.swift in Sources */,
 				A20AB2CB1CBEDB24008DBB60 /* AppDelegate.swift in Sources */,
 				A26757BD1CC6CCF6001DC1D1 /* Submesh.swift in Sources */,
+				A26757C31CC6DDA4001DC1D1 /* ShaderTypes.swift in Sources */,
 				40437D671CBEFC4200B8685F /* Vertex.swift in Sources */,
 				40437D651CBEEA1600B8685F /* Node.swift in Sources */,
 			);

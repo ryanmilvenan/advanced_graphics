@@ -30,8 +30,9 @@ class SceneViewController:UIViewController, MTKViewDelegate {
     let inflightSemaphore = dispatch_semaphore_create(MaxBuffers)
     var bufferIndex = 0
     
-    var projectionMatrix:matrix_float4x4! = nil
-    var viewMatrix:matrix_float4x4! = nil
+    var projectionMatrix: float4x4 = float4x4(matrix_identity_float4x4)
+    var viewMatrix: float4x4 = float4x4(matrix_identity_float4x4)
+    var rotation: Float = 0
     
     override func viewDidLoad() {
         
@@ -41,6 +42,11 @@ class SceneViewController:UIViewController, MTKViewDelegate {
         self.setupView();
         self.loadAssets();
         self.reshape();
+    }
+    
+    
+    func view(view: MTKView, willLayoutWithSize size: CGSize) {
+        reshape()
     }
     
     func setupMetal() {
@@ -65,10 +71,6 @@ class SceneViewController:UIViewController, MTKViewDelegate {
         
         view.sampleCount = 4
         view.depthStencilPixelFormat = MTLPixelFormat.Depth32Float_Stencil8
-    }
-    
-    func reshape() {
-        
     }
     
     func loadAssets() {
@@ -163,11 +165,31 @@ class SceneViewController:UIViewController, MTKViewDelegate {
         }
         
     }
+
+    func update() {
+        let frameContentsPointer = UnsafeMutablePointer<FrameUniforms>(
+            frameUniformBuffers[bufferIndex].contents()
+        )
+        var frameData = frameContentsPointer.memory
+        
+        frameData.model = matrixFromTranslation(x: 0, y: 0, z: 2) * matrixFromRotation(radians: rotation, x: 1, y: 1, z: 0)
+        frameData.view = viewMatrix
+        
+        let modelViewMatrix = frameData.view * frameData.model
+        frameData.projectionView = projectionMatrix * modelViewMatrix
+        frameData.normal = modelViewMatrix.transpose.inverse
+        
+        frameContentsPointer.memory = frameData
+        
+        rotation += 0.02
+        
+    }
     
     func drawInMTKView(view: MTKView) {
         
         // use semaphore to encode 3 frames ahead
         dispatch_semaphore_wait(inflightSemaphore, DISPATCH_TIME_FOREVER)
+        update()
         
         let commandBuffer = commandQueue.commandBuffer()
         commandBuffer.label = "Frame command buffer"
@@ -183,11 +205,27 @@ class SceneViewController:UIViewController, MTKViewDelegate {
         
         if let renderPassDescriptor = view.currentRenderPassDescriptor, currentDrawable = view.currentDrawable
         {
-            renderPassDescriptor.colorAttachments[0].clearColor = MTLClearColorMake(0, 0.5, 0.5, 1.0)
+            renderPassDescriptor.colorAttachments[0].loadAction = .Clear
+            renderPassDescriptor.colorAttachments[0].clearColor = MTLClearColorMake(0.3, 0.1, 0.3, 1)
+            
             let renderEncoder = commandBuffer.renderCommandEncoderWithDescriptor(renderPassDescriptor)
             renderEncoder.label = "render encoder"
-            
-            renderEncoder.pushDebugGroup("draw scene")
+            renderEncoder.setViewport(MTLViewport(
+                originX: 0, originY: 0,
+                width:  Double(view.drawableSize.width),
+                height: Double(view.drawableSize.height),
+                znear: 0, zfar: 1)
+            )
+            renderEncoder.setDepthStencilState(depthState)
+            renderEncoder.setRenderPipelineState(pipelineState)
+            renderEncoder.setVertexBuffer(
+                frameUniformBuffers[bufferIndex],
+                offset: 0, atIndex: BufferIndex.FrameUniformBuffer.rawValue
+            )
+            renderEncoder.pushDebugGroup("Render Meshes")
+            for mesh in meshes {
+                mesh.renderWithEncoder(renderEncoder)
+            }
             renderEncoder.popDebugGroup()
             renderEncoder.endEncoding()
                 
@@ -198,6 +236,16 @@ class SceneViewController:UIViewController, MTKViewDelegate {
         bufferIndex = (bufferIndex + 1) % MaxBuffers
         
         commandBuffer.commit()
+    }
+    
+    func reshape() {
+        let aspect = fabsf(Float(CGRectGetWidth(view.bounds) / CGRectGetHeight(view.bounds)))
+        projectionMatrix = matrixFromPerspectiveFOVAspectLH(
+            fovY: Float(65 * M_PI / 180),
+            aspect: aspect,
+            nearZ: 0.1, farZ: 100
+        )
+        viewMatrix = float4x4(matrix_identity_float4x4)
     }
     
     
