@@ -9,6 +9,7 @@
 import UIKit
 import Metal
 import MetalKit
+import CoreMotion
 import simd
 
 let MaxBuffers = 3
@@ -18,6 +19,8 @@ let ConstantBufferSize = 1024*1024
 class SceneViewController:UIViewController, MTKViewDelegate {
     
     var device: MTLDevice! = nil
+    
+    let manager = CMMotionManager()
     
     var commandQueue: MTLCommandQueue! = nil
     var pipelineState: MTLRenderPipelineState! = nil
@@ -38,6 +41,7 @@ class SceneViewController:UIViewController, MTKViewDelegate {
         
         super.viewDidLoad()
         
+        self.setupAccelerometer()
         self.setupMetal();
         self.setupView();
         self.loadAssets();
@@ -47,6 +51,18 @@ class SceneViewController:UIViewController, MTKViewDelegate {
     
     func view(view: MTKView, willLayoutWithSize size: CGSize) {
         reshape()
+    }
+    
+    func setupAccelerometer() {
+        if manager.accelerometerAvailable {
+            manager.accelerometerUpdateInterval = 0.01
+            manager.startAccelerometerUpdatesToQueue(NSOperationQueue.mainQueue()) {
+                [weak self] (data: CMAccelerometerData?, error: NSError?) in
+                if let acceleration = data?.acceleration {
+                    self!.rotation = Float(acceleration.y)
+                }
+            }
+        }
     }
     
     func setupMetal() {
@@ -78,8 +94,8 @@ class SceneViewController:UIViewController, MTKViewDelegate {
         // load any resources required for rendering
         let view = self.view as! MTKView
 
-        let fragmentProgram = defaultLibrary.newFunctionWithName("passThroughFragment")!
-        let vertexProgram = defaultLibrary.newFunctionWithName("passThroughVertex")!
+        let fragmentProgram = defaultLibrary.newFunctionWithName("fragmentShader")!
+        let vertexProgram = defaultLibrary.newFunctionWithName("vertexShader")!
         
         let meshVertexBufferIdx:Int = BufferIndex.MeshVertexBuffer.rawValue
         
@@ -134,7 +150,9 @@ class SceneViewController:UIViewController, MTKViewDelegate {
         (mdlVertexDescriptor.attributes[texcoordAttribute] as! MDLVertexAttribute).name = MDLVertexAttributeTextureCoordinate
         
         let bufferAllocator:MTKMeshBufferAllocator = MTKMeshBufferAllocator(device: self.device)
-        let assetURL:NSURL = NSBundle.mainBundle().URLForResource("some location", withExtension: nil)!
+        
+        let sub = "models/minisub/minisub_data"
+        let assetURL:NSURL = NSBundle.mainBundle().URLForResource(sub, withExtension: ".obj")!
         
         let asset:MDLAsset = MDLAsset(URL: assetURL, vertexDescriptor: mdlVertexDescriptor, bufferAllocator: bufferAllocator)
         
@@ -172,7 +190,7 @@ class SceneViewController:UIViewController, MTKViewDelegate {
         )
         var frameData = frameContentsPointer.memory
         
-        frameData.model = matrixFromTranslation(x: 0, y: 0, z: 2) * matrixFromRotation(radians: rotation, x: 1, y: 1, z: 0)
+        frameData.model = matrixFromTranslation(x: 0, y: 0, z: 7) * matrixFromRotation(radians: rotation, x: 1, y: 1, z: 0)
         frameData.view = viewMatrix
         
         let modelViewMatrix = frameData.view * frameData.model
@@ -250,6 +268,6 @@ class SceneViewController:UIViewController, MTKViewDelegate {
     
     
     func mtkView(view: MTKView, drawableSizeWillChange size: CGSize) {
-        
+        reshape()
     }
 }
