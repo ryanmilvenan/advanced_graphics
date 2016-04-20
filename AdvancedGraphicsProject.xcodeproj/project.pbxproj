@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		40437D651CBEEA1600B8685F /* Node.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40437D641CBEEA1600B8685F /* Node.swift */; };
 		40437D671CBEFC4200B8685F /* Vertex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40437D661CBEFC4200B8685F /* Vertex.swift */; };
+		40437D6F1CC8242700B8685F /* ShaderTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40437D6E1CC8242700B8685F /* ShaderTypes.swift */; };
 		A20AB2CB1CBEDB24008DBB60 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20AB2CA1CBEDB24008DBB60 /* AppDelegate.swift */; };
 		A20AB2CD1CBEDB24008DBB60 /* SceneViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20AB2CC1CBEDB24008DBB60 /* SceneViewController.swift */; };
 		A20AB2CF1CBEDB24008DBB60 /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = A20AB2CE1CBEDB24008DBB60 /* Shaders.metal */; };
@@ -20,7 +21,6 @@
 		A26757BD1CC6CCF6001DC1D1 /* Submesh.swift in Sources */ = {isa = PBXBuildFile; fileRef = A26757BC1CC6CCF5001DC1D1 /* Submesh.swift */; };
 		A26757BF1CC6CD00001DC1D1 /* Mesh.swift in Sources */ = {isa = PBXBuildFile; fileRef = A26757BE1CC6CD00001DC1D1 /* Mesh.swift */; };
 		A26757C11CC6DB74001DC1D1 /* Math.swift in Sources */ = {isa = PBXBuildFile; fileRef = A26757C01CC6DB74001DC1D1 /* Math.swift */; };
-		A26757C31CC6DDA4001DC1D1 /* ShaderTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = A26757C21CC6DDA4001DC1D1 /* ShaderTypes.swift */; };
 		A26757C51CC6DE26001DC1D1 /* models in Resources */ = {isa = PBXBuildFile; fileRef = A26757C41CC6DE26001DC1D1 /* models */; };
 /* End PBXBuildFile section */
 
@@ -44,6 +44,7 @@
 /* Begin PBXFileReference section */
 		40437D641CBEEA1600B8685F /* Node.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Node.swift; sourceTree = "<group>"; };
 		40437D661CBEFC4200B8685F /* Vertex.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Vertex.swift; sourceTree = "<group>"; };
+		40437D6E1CC8242700B8685F /* ShaderTypes.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ShaderTypes.swift; sourceTree = "<group>"; };
 		A20AB2C71CBEDB24008DBB60 /* AdvancedGraphicsProject.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AdvancedGraphicsProject.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A20AB2CA1CBEDB24008DBB60 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		A20AB2CC1CBEDB24008DBB60 /* SceneViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneViewController.swift; sourceTree = "<group>"; };
@@ -61,7 +62,6 @@
 		A26757BC1CC6CCF5001DC1D1 /* Submesh.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Submesh.swift; sourceTree = "<group>"; };
 		A26757BE1CC6CD00001DC1D1 /* Mesh.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Mesh.swift; sourceTree = "<group>"; };
 		A26757C01CC6DB74001DC1D1 /* Math.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Math.swift; sourceTree = "<group>"; };
-		A26757C21CC6DDA4001DC1D1 /* ShaderTypes.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ShaderTypes.swift; sourceTree = "<group>"; };
 		A26757C41CC6DE26001DC1D1 /* models */ = {isa = PBXFileReference; lastKnownFileType = folder; path = models; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -114,9 +114,9 @@
 			isa = PBXGroup;
 			children = (
 				A26757C41CC6DE26001DC1D1 /* models */,
-				A26757C21CC6DDA4001DC1D1 /* ShaderTypes.swift */,
 				A20AB2CA1CBEDB24008DBB60 /* AppDelegate.swift */,
 				A20AB2CC1CBEDB24008DBB60 /* SceneViewController.swift */,
+				40437D6E1CC8242700B8685F /* ShaderTypes.swift */,
 				A26757C01CC6DB74001DC1D1 /* Math.swift */,
 				A26757BC1CC6CCF5001DC1D1 /* Submesh.swift */,
 				A26757BE1CC6CD00001DC1D1 /* Mesh.swift */,
@@ -290,7 +290,7 @@
 				A20AB2CD1CBEDB24008DBB60 /* SceneViewController.swift in Sources */,
 				A20AB2CB1CBEDB24008DBB60 /* AppDelegate.swift in Sources */,
 				A26757BD1CC6CCF6001DC1D1 /* Submesh.swift in Sources */,
-				A26757C31CC6DDA4001DC1D1 /* ShaderTypes.swift in Sources */,
+				40437D6F1CC8242700B8685F /* ShaderTypes.swift in Sources */,
 				40437D671CBEFC4200B8685F /* Vertex.swift in Sources */,
 				40437D651CBEEA1600B8685F /* Node.swift in Sources */,
 			);
