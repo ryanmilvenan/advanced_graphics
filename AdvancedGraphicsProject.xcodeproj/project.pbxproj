@@ -10,6 +10,7 @@
 		40437D651CBEEA1600B8685F /* Node.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40437D641CBEEA1600B8685F /* Node.swift */; };
 		40437D671CBEFC4200B8685F /* Vertex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40437D661CBEFC4200B8685F /* Vertex.swift */; };
 		40437D6F1CC8242700B8685F /* ShaderTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40437D6E1CC8242700B8685F /* ShaderTypes.swift */; };
+		40437D711CC8484600B8685F /* Sub.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40437D701CC8484600B8685F /* Sub.swift */; };
 		A20AB2CB1CBEDB24008DBB60 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20AB2CA1CBEDB24008DBB60 /* AppDelegate.swift */; };
 		A20AB2CD1CBEDB24008DBB60 /* SceneViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20AB2CC1CBEDB24008DBB60 /* SceneViewController.swift */; };
 		A20AB2CF1CBEDB24008DBB60 /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = A20AB2CE1CBEDB24008DBB60 /* Shaders.metal */; };
@@ -45,6 +46,7 @@
 		40437D641CBEEA1600B8685F /* Node.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Node.swift; sourceTree = "<group>"; };
 		40437D661CBEFC4200B8685F /* Vertex.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Vertex.swift; sourceTree = "<group>"; };
 		40437D6E1CC8242700B8685F /* ShaderTypes.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ShaderTypes.swift; sourceTree = "<group>"; };
+		40437D701CC8484600B8685F /* Sub.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Sub.swift; sourceTree = "<group>"; };
 		A20AB2C71CBEDB24008DBB60 /* AdvancedGraphicsProject.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AdvancedGraphicsProject.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A20AB2CA1CBEDB24008DBB60 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		A20AB2CC1CBEDB24008DBB60 /* SceneViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneViewController.swift; sourceTree = "<group>"; };
@@ -122,6 +124,7 @@
 				A26757BE1CC6CD00001DC1D1 /* Mesh.swift */,
 				A20AB2CE1CBEDB24008DBB60 /* Shaders.metal */,
 				40437D641CBEEA1600B8685F /* Node.swift */,
+				40437D701CC8484600B8685F /* Sub.swift */,
 				40437D661CBEFC4200B8685F /* Vertex.swift */,
 				A20AB2D01CBEDB24008DBB60 /* Main.storyboard */,
 				A20AB2D31CBEDB24008DBB60 /* Assets.xcassets */,
@@ -284,6 +287,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				40437D711CC8484600B8685F /* Sub.swift in Sources */,
 				A20AB2CF1CBEDB24008DBB60 /* Shaders.metal in Sources */,
 				A26757C11CC6DB74001DC1D1 /* Math.swift in Sources */,
 				A26757BF1CC6CD00001DC1D1 /* Mesh.swift in Sources */,
@@ -438,6 +442,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				EMBEDDED_CONTENT_CONTAINS_SWIFT = YES;
 				INFOPLIST_FILE = AdvancedGraphicsProject/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.carnivalinparadise.AdvancedGraphicsProject;
@@ -452,6 +457,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				EMBEDDED_CONTENT_CONTAINS_SWIFT = YES;
 				INFOPLIST_FILE = AdvancedGraphicsProject/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.carnivalinparadise.AdvancedGraphicsProject;

@@ -9,6 +9,7 @@
 import UIKit
 import Metal
 import MetalKit
+import GLKit
 import CoreMotion
 import simd
 
@@ -27,7 +28,7 @@ class SceneViewController:UIViewController, MTKViewDelegate {
     var defaultLibrary: MTLLibrary! = nil
     var depthState: MTLDepthStencilState! = nil
     
-    var meshes:[Mesh] = []
+    var scene:Node! = nil
     var frameUniformBuffers:[MTLBuffer] = []
     
     let inflightSemaphore = dispatch_semaphore_create(MaxBuffers)
@@ -152,28 +153,8 @@ class SceneViewController:UIViewController, MTKViewDelegate {
         let bufferAllocator:MTKMeshBufferAllocator = MTKMeshBufferAllocator(device: self.device)
         
         let sub = "models/minisub/minisub_data"
-        let assetURL:NSURL = NSBundle.mainBundle().URLForResource(sub, withExtension: ".obj")!
         
-        let asset:MDLAsset = MDLAsset(URL: assetURL, vertexDescriptor: mdlVertexDescriptor, bufferAllocator: bufferAllocator)
-        
-        var mtkMeshes:NSArray?
-        var mdlMeshes:NSArray?
-        
-        do {
-            mtkMeshes = try MTKMesh.newMeshesFromAsset(asset, device: device, sourceMeshes: &mdlMeshes)
-        } catch {
-            print("Failed to create mesh")
-            return
-        }
-
-        meshes = []
-        for index in 0 ..< mtkMeshes!.count {
-            let mtkMesh: MTKMesh = mtkMeshes![index] as! MTKMesh
-            let mdlMesh: MDLMesh = mdlMeshes![index] as! MDLMesh
-            let newMesh = Mesh(mtkMesh: mtkMesh, mdlMesh: mdlMesh, device: device)
-            
-            meshes.append(newMesh)
-        }
+        scene = Sub(name: "Sub", device: device, assetPath: sub, vertexDescriptor: mdlVertexDescriptor, bufferAllocator: bufferAllocator)
         
         for _ in 0 ..< MaxBuffers {
             frameUniformBuffers.append(device.newBufferWithLength(
@@ -184,22 +165,8 @@ class SceneViewController:UIViewController, MTKViewDelegate {
         
     }
 
-    func update() {
-        let frameContentsPointer = UnsafeMutablePointer<FrameUniforms>(
-            frameUniformBuffers[bufferIndex].contents()
-        )
-        var frameData = frameContentsPointer.memory
-        
-        frameData.model = matrixFromTranslation(x: 0, y: 0, z: 7) * matrixFromRotation(radians: rotation, x: 1, y: 1, z: 0)
-        frameData.view = viewMatrix
-        
-        let modelViewMatrix = frameData.view * frameData.model
-        frameData.projectionView = projectionMatrix * modelViewMatrix
-        frameData.normal = modelViewMatrix.transpose.inverse
-        
-        frameContentsPointer.memory = frameData
-        
-        rotation += 0.02
+    
+    func updateSceneGeometry(frameData:FrameUniforms) {
         
     }
     
@@ -207,7 +174,6 @@ class SceneViewController:UIViewController, MTKViewDelegate {
         
         // use semaphore to encode 3 frames ahead
         dispatch_semaphore_wait(inflightSemaphore, DISPATCH_TIME_FOREVER)
-        update()
         
         let commandBuffer = commandQueue.commandBuffer()
         commandBuffer.label = "Frame command buffer"
@@ -240,10 +206,8 @@ class SceneViewController:UIViewController, MTKViewDelegate {
                 frameUniformBuffers[bufferIndex],
                 offset: 0, atIndex: BufferIndex.FrameUniformBuffer.rawValue
             )
-            renderEncoder.pushDebugGroup("Render Meshes")
-            for mesh in meshes {
-                mesh.renderWithEncoder(renderEncoder)
-            }
+            renderEncoder.pushDebugGroup("Render Scene")
+            scene.renderWithParentModelViewMatrix(viewMatrix, projectionMatrix: projectionMatrix, encoder: renderEncoder, frameBuffer:frameUniformBuffers, bufferIdx:bufferIndex)
             renderEncoder.popDebugGroup()
             renderEncoder.endEncoding()
                 

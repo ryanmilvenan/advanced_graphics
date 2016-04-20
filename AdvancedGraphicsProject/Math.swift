@@ -7,6 +7,8 @@
 //
 
 import simd
+import GLKit
+import Foundation
 
 func matrixFromPerspectiveFOVAspectLH(fovY fovY: Float, aspect: Float, nearZ: Float, farZ: Float) -> float4x4 {
     let yscale = 1.0 / tanf(fovY * 0.5 )
@@ -49,8 +51,33 @@ func matrixFromRotation(radians radians: Float, x: Float, y: Float, z: Float) ->
     
     return m
 }
-func matrixFromTranslation(x x: Float, y: Float, z: Float) -> float4x4 {
-    var m = matrix_identity_float4x4
+
+func convertToFloat4x4FromGLKMatrix(matrix:GLKMatrix4) -> float4x4 {
+    return float4x4([
+    [matrix.m00, matrix.m01, matrix.m02, matrix.m03],
+    [matrix.m10, matrix.m11, matrix.m12, matrix.m13],
+    [matrix.m20, matrix.m21, matrix.m22, matrix.m23],
+    [matrix.m30, matrix.m31, matrix.m32, matrix.m33],
+    ])
+}
+
+func matrixFromRotationDeg(degree degree:Float, x: Float, y: Float, z: Float) -> float4x4 {
+    let radians = (Double(degree) * M_PI) / 180
+    return matrixFromRotation(radians: Float(radians), x: x, y: y, z: z)
+}
+
+func matrixFromScale(x:Float, y:Float, z:Float) -> float4x4 {
+    let m = float4x4([
+    [x, 0, 0, 0],
+    [0, y, 0, 0],
+    [0, 0, z, 0],
+    [0, 0, 0, 1]
+    ])
+    return m
+}
+
+func matrixFromTranslation(x x: Float, y: Float, z: Float, parent: matrix_float4x4 = matrix_identity_float4x4) -> float4x4 {
+    var m = parent
     m.columns.3 = [x, y, z, 1.0]
     return float4x4(m)
 }
