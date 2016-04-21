@@ -2,86 +2,104 @@
 //  Math.swift
 //  AdvancedGraphicsProject
 //
-//  Created by Wind on 4/19/16.
+//  Created by Mountain on 4/21/16.
 //  Copyright © 2016 Ryan Milvenan. All rights reserved.
 //
 
-import simd
-import GLKit
 import Foundation
+import simd
 
-func matrixFromPerspectiveFOVAspectLH(fovY fovY: Float, aspect: Float, nearZ: Float, farZ: Float) -> float4x4 {
-    let yscale = 1.0 / tanf(fovY * 0.5 )
-    let xscale = yscale / aspect
-    let q = farZ / (farZ - nearZ)
-    
-    let m = float4x4([
-        [xscale, 0,          0, 0],
-        [0, yscale,          0, 0],
-        [0,      0, q         , 1],
-        [0,      0, q * -nearZ, 0]
-        ])
-    
-    return m
-}
-func matrixFromRotation(radians radians: Float, x: Float, y: Float, z: Float) -> float4x4 {
-    let v = vectorNormalize(x: x, y: y, z: z)
-    let sin = sinf(radians)
-    let cos = cosf(radians)
-    let cosp = 1 - cos
-    
-    let m00 = cos + cosp * v.x * v.x
-    let m01 = cosp * v.x * v.y + v.z * sin
-    let m02 = cosp * v.x * v.z - v.y * sin
-    
-    let m10 = cosp * v.x * v.y - v.z * sin
-    let m11 = cos + cosp * v.y * v.y
-    let m12 = cosp * v.y * v.z + v.x * sin
-    
-    let m20 = cosp * v.x * v.z + v.y * sin
-    let m21 = cosp * v.y * v.z - v.x * sin
-    let m22 = cos + cosp * v.z * v.z
-    
-    let m = float4x4([
-        [m00,m01,m02,0],
-        [m10,m11,m12,0],
-        [m20,m21,m22,0],
-        [  0,  0,  0,1],
-        ])
-    
-    return m
+func vector_orthogonal(v:vector_float3) -> vector_float3 {
+    return fabsf(v.x) > fabsf(v.z) ? vector_float3(-v.y, v.x, 0.0) : vector_float3(0.0, -v.z, v.y)
 }
 
-func convertToFloat4x4FromGLKMatrix(matrix:GLKMatrix4) -> float4x4 {
-    return float4x4([
-    [matrix.m00, matrix.m01, matrix.m02, matrix.m03],
-    [matrix.m10, matrix.m11, matrix.m12, matrix.m13],
-    [matrix.m20, matrix.m21, matrix.m22, matrix.m23],
-    [matrix.m30, matrix.m31, matrix.m32, matrix.m33],
-    ])
+func matrix_identity() -> matrix_float4x4 {
+    return matrix_identity_float4x4
 }
 
-func matrixFromRotationDeg(degree degree:Float, x: Float, y: Float, z: Float) -> float4x4 {
-    let radians = (Double(degree) * M_PI) / 180
-    return matrixFromRotation(radians: Float(radians), x: x, y: y, z: z)
-}
-
-func matrixFromScale(x:Float, y:Float, z:Float) -> float4x4 {
-    let m = float4x4([
-    [x, 0, 0, 0],
-    [0, y, 0, 0],
-    [0, 0, z, 0],
-    [0, 0, 0, 1]
-    ])
+func matrix_rotation(axis:vector_float3, angle:Float) -> matrix_float4x4 {
+    let c:Float = cos(angle)
+    let s:Float = sin(angle)
+    
+    var X:vector_float4 = vector_float4()
+    X.x = axis.x * axis.x + (1 - axis.x * axis.x) * c;
+    X.y = axis.x * axis.y * (1 - c) - axis.z*s;
+    X.z = axis.x * axis.z * (1 - c) + axis.y * s;
+    X.w = 0.0;
+    
+    var Y:vector_float4 = vector_float4()
+    Y.x = axis.x * axis.y * (1 - c) + axis.z * s;
+    Y.y = axis.y * axis.y + (1 - axis.y * axis.y) * c;
+    Y.z = axis.y * axis.z * (1 - c) - axis.x * s;
+    Y.w = 0.0;
+    
+    var Z:vector_float4 = vector_float4()
+    Z.x = axis.x * axis.z * (1 - c) - axis.y * s;
+    Z.y = axis.y * axis.z * (1 - c) + axis.x * s;
+    Z.z = axis.z * axis.z + (1 - axis.z * axis.z) * c;
+    Z.w = 0.0;
+    
+    var W:vector_float4 = vector_float4()
+    W.x = 0.0;
+    W.y = 0.0;
+    W.z = 0.0;
+    W.w = 1.0;
+    
+    let m:matrix_float4x4 = matrix_float4x4(columns: (X, Y, Z, W))
     return m
 }
 
-func matrixFromTranslation(x x: Float, y: Float, z: Float, parent: matrix_float4x4 = matrix_identity_float4x4) -> float4x4 {
-    var m = parent
-    m.columns.3 = [x, y, z, 1.0]
-    return float4x4(m)
+func matrix_translation(t:vector_float3) -> matrix_float4x4 {
+    let X:vector_float4 = vector_float4(1, 0, 0 ,0)
+    let Y:vector_float4 = vector_float4(0, 1, 0 ,0)
+    let Z:vector_float4 = vector_float4(0, 0, 1 ,0)
+    let W:vector_float4 = vector_float4(t.x, t.y, t.z ,1)
+    
+    let m:matrix_float4x4 = matrix_float4x4(columns: (X, Y, Z, W))
+    return m
 }
-func vectorNormalize(x x:Float, y: Float, z: Float) -> vector_float3 {
-    let magnitude = sqrtf(x * x + y * y + z * z)
-    return vector_float3( [ x/magnitude, y/magnitude, z/magnitude ] )
+
+func matrix_scale(s:vector_float3) -> matrix_float4x4 {
+    let X:vector_float4 = vector_float4(s.x,   0,   0, 0)
+    let Y:vector_float4 = vector_float4(  0, s.y,   0, 0)
+    let Z:vector_float4 = vector_float4(  0,   0, s.z, 0)
+    let W:vector_float4 = vector_float4(  0,   0,   0, 1)
+    
+    let m:matrix_float4x4 = matrix_float4x4(columns: (X, Y, Z, W))
+    return m
+}
+
+func matrix_scale_uniform(s:Float) -> matrix_float4x4 {
+    let X:vector_float4 = vector_float4(s, 0, 0, 0)
+    let Y:vector_float4 = vector_float4(0, s, 0, 0)
+    let Z:vector_float4 = vector_float4(0, 0, s, 0)
+    let W:vector_float4 = vector_float4(0, 0, 0, 1)
+    
+    let m:matrix_float4x4 = matrix_float4x4(columns: (X, Y, Z, W))
+    return m
+}
+
+func matrix_perspective_projection(aspect:Float, fovy:Float, near:Float, far:Float) -> matrix_float4x4 {
+    let yScale:Float = 1 / tan(fovy * 0.5)
+    let xScale:Float = yScale / aspect
+    let zRange:Float = far - near
+    let zScale:Float = -(far + near) / zRange
+    let wzScale:Float = -2 * far * near / zRange
+    
+    let P:vector_float4 = vector_float4(xScale, 0, 0, 0)
+    let Q:vector_float4 = vector_float4(0, yScale, 0, 0)
+    let R:vector_float4 = vector_float4(0, 0, zScale, 0)
+    let S:vector_float4 = vector_float4(0, 0, wzScale,0)
+    
+    let m:matrix_float4x4 = matrix_float4x4(columns: (P, Q, R, S))
+    return m
+}
+
+func matrix_extract_linear(matrix:matrix_float4x4) -> matrix_float4x4 {
+    var lin:matrix_float4x4 = matrix
+    lin.columns.0.z = 0
+    lin.columns.1.z = 0
+    lin.columns.2.z = 0
+    lin.columns.3 = vector_float4(0, 0, 0, 1)
+    return lin
 }
