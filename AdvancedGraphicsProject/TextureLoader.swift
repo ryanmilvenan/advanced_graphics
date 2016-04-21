@@ -59,7 +59,6 @@ class TextureLoader {
         let imageRect:CGRect = CGRectMake(0, 0, CGFloat(width), CGFloat(height))
         CGContextDrawImage(context, imageRect, imageRef)
         
-        //let rawData = UnsafePointer<__uint8_t>(rawDataPointer).memory
         return rawData
     }
     
