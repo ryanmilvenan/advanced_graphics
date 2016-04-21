@@ -15,8 +15,7 @@ class Node {
     
     let name: String
     var meshes: [Mesh] = []
-    var vertexDescriptor:MDLVertexDescriptor
-    var bufferAllocator:MTKMeshBufferAllocator
+    var vertexDescriptor:MTLVertexDescriptor
     var device:MTLDevice
     
     
@@ -27,11 +26,10 @@ class Node {
     var scale:Float
     var children:[Node] = []
     
-    init(name: String, device:MTLDevice, assetPath:String, vertexDescriptor:MDLVertexDescriptor, bufferAllocator:MTKMeshBufferAllocator){
+    init(name: String, device:MTLDevice, assetPath:String, vertexDescriptor:MTLVertexDescriptor){
         self.name = name
         self.device = device
         self.vertexDescriptor = vertexDescriptor
-        self.bufferAllocator = bufferAllocator
         
         self.position = GLKVector3Make(0, 0, 0)
         self.rotateX = 0
@@ -45,9 +43,21 @@ class Node {
     
     func loadMeshesFromAsset(assetPath:String)
     {
+        
+        let vertexAttributePosition:Int = VertexAttributes.VertexAttributePosition.rawValue
+        let normalAttributePosition:Int = VertexAttributes.VertexAttributeNormal.rawValue
+        let texcoordAttribute:Int = VertexAttributes.VertexAttributeTexcoord.rawValue
+        
+        let mdlVertexDescriptor:MDLVertexDescriptor = MTKModelIOVertexDescriptorFromMetal(self.vertexDescriptor)
+        (mdlVertexDescriptor.attributes[vertexAttributePosition] as! MDLVertexAttribute).name = MDLVertexAttributePosition
+        (mdlVertexDescriptor.attributes[normalAttributePosition] as! MDLVertexAttribute).name = MDLVertexAttributeNormal
+        (mdlVertexDescriptor.attributes[texcoordAttribute] as! MDLVertexAttribute).name = MDLVertexAttributeTextureCoordinate
+        
+        let bufferAllocator:MTKMeshBufferAllocator = MTKMeshBufferAllocator(device: self.device)
+        
         let assetURL:NSURL = NSBundle.mainBundle().URLForResource(assetPath, withExtension: ".obj")!
         
-        let asset:MDLAsset = MDLAsset(URL: assetURL, vertexDescriptor: self.vertexDescriptor, bufferAllocator: self.bufferAllocator)
+        let asset:MDLAsset = MDLAsset(URL: assetURL, vertexDescriptor: mdlVertexDescriptor, bufferAllocator: bufferAllocator)
         
         var mtkMeshes:NSArray?
         var mdlMeshes:NSArray?
@@ -98,12 +108,19 @@ class Node {
             child.renderWithParentModelViewMatrix(parentModelViewMatrix, projectionMatrix: projectionMatrix, encoder: encoder, frameBuffer: frameBuffer, bufferIdx: bufferIdx)
         }
         
+
         self.updateFrameUniforms(parentModelViewMatrix, projectionMatrix: projectionMatrix, frameUniformBuffers: frameBuffer, bufferIndex: bufferIdx)
-        
+        encoder.setVertexBuffer(
+            frameBuffer[bufferIdx],
+            offset: 0, atIndex: BufferIndex.FrameUniformBuffer.rawValue
+        )
         encoder.pushDebugGroup("Rendering \(self.name)")
         for mesh in self.meshes {
             mesh.renderWithEncoder(encoder)
         }
+        
+
+
     
         encoder.popDebugGroup()
     }

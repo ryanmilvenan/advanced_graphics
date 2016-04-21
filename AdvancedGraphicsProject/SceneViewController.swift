@@ -145,16 +145,11 @@ class SceneViewController:UIViewController, MTKViewDelegate {
         depthStateDescriptor.depthWriteEnabled = true
         depthState = device.newDepthStencilStateWithDescriptor(depthStateDescriptor)
         
-        let mdlVertexDescriptor:MDLVertexDescriptor = MTKModelIOVertexDescriptorFromMetal(mtlVertexDescriptor)
-        (mdlVertexDescriptor.attributes[vertexAttributePosition] as! MDLVertexAttribute).name = MDLVertexAttributePosition
-        (mdlVertexDescriptor.attributes[normalAttributePosition] as! MDLVertexAttribute).name = MDLVertexAttributeNormal
-        (mdlVertexDescriptor.attributes[texcoordAttribute] as! MDLVertexAttribute).name = MDLVertexAttributeTextureCoordinate
-        
-        let bufferAllocator:MTKMeshBufferAllocator = MTKMeshBufferAllocator(device: self.device)
+
         
         let sub = "models/minisub/minisub_data"
         
-        scene = Sub(name: "Sub", device: device, assetPath: sub, vertexDescriptor: mdlVertexDescriptor, bufferAllocator: bufferAllocator)
+        scene = Sub(name: "Sub", device: device, assetPath: sub, vertexDescriptor: mtlVertexDescriptor)
         
         for _ in 0 ..< MaxBuffers {
             frameUniformBuffers.append(device.newBufferWithLength(
@@ -202,10 +197,7 @@ class SceneViewController:UIViewController, MTKViewDelegate {
             )
             renderEncoder.setDepthStencilState(depthState)
             renderEncoder.setRenderPipelineState(pipelineState)
-            renderEncoder.setVertexBuffer(
-                frameUniformBuffers[bufferIndex],
-                offset: 0, atIndex: BufferIndex.FrameUniformBuffer.rawValue
-            )
+           
             renderEncoder.pushDebugGroup("Render Scene")
             scene.renderWithParentModelViewMatrix(viewMatrix, projectionMatrix: projectionMatrix, encoder: renderEncoder, frameBuffer:frameUniformBuffers, bufferIdx:bufferIndex)
             renderEncoder.popDebugGroup()

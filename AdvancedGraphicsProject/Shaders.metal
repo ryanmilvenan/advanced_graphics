@@ -84,7 +84,7 @@ vertex ShaderInOut vertexShader(VertexInput in [[stage_in]],
     float4 eye_normal = normalize(frameUniforms.normal * float4(in.normal, 0.0));
     float n_dot_l = dot(eye_normal.rgb, normalize(lightPosition));
     n_dot_l = fmax(0.0, n_dot_l);
-    out.color = half4(materialUniforms.emissiveColor + n_dot_l);
+    out.color = half4(materialUniforms.emissiveColor + n_dot_l +1.0);
     
     // Pass through texture coordinate
     out.texcoord = in.texcoord;
