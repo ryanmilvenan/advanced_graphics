@@ -12,6 +12,10 @@
 		40437D6F1CC8242700B8685F /* ShaderTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40437D6E1CC8242700B8685F /* ShaderTypes.swift */; };
 		40437D711CC8484600B8685F /* Sub.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40437D701CC8484600B8685F /* Sub.swift */; };
 		40437D791CC8704900B8685F /* Tree.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40437D781CC8704900B8685F /* Tree.swift */; };
+		40437D7E1CC8743F00B8685F /* sand.png in Resources */ = {isa = PBXBuildFile; fileRef = 40437D7C1CC8743F00B8685F /* sand.png */; };
+		40437D7F1CC8743F00B8685F /* water.png in Resources */ = {isa = PBXBuildFile; fileRef = 40437D7D1CC8743F00B8685F /* water.png */; };
+		40437D821CC8744F00B8685F /* palm_diffuse.png in Resources */ = {isa = PBXBuildFile; fileRef = 40437D801CC8744F00B8685F /* palm_diffuse.png */; };
+		40437D831CC8744F00B8685F /* palm.obj in Resources */ = {isa = PBXBuildFile; fileRef = 40437D811CC8744F00B8685F /* palm.obj */; };
 		A20AB2CB1CBEDB24008DBB60 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20AB2CA1CBEDB24008DBB60 /* AppDelegate.swift */; };
 		A20AB2CD1CBEDB24008DBB60 /* SceneViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20AB2CC1CBEDB24008DBB60 /* SceneViewController.swift */; };
 		A20AB2CF1CBEDB24008DBB60 /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = A20AB2CE1CBEDB24008DBB60 /* Shaders.metal */; };
@@ -49,6 +53,10 @@
 		40437D6E1CC8242700B8685F /* ShaderTypes.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ShaderTypes.swift; sourceTree = "<group>"; };
 		40437D701CC8484600B8685F /* Sub.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Sub.swift; sourceTree = "<group>"; };
 		40437D781CC8704900B8685F /* Tree.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Tree.swift; sourceTree = "<group>"; };
+		40437D7C1CC8743F00B8685F /* sand.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = sand.png; sourceTree = "<group>"; };
+		40437D7D1CC8743F00B8685F /* water.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = water.png; sourceTree = "<group>"; };
+		40437D801CC8744F00B8685F /* palm_diffuse.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = palm_diffuse.png; path = models/tree/palm_diffuse.png; sourceTree = "<group>"; };
+		40437D811CC8744F00B8685F /* palm.obj */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = palm.obj; path = models/tree/palm.obj; sourceTree = "<group>"; };
 		A20AB2C71CBEDB24008DBB60 /* AdvancedGraphicsProject.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AdvancedGraphicsProject.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A20AB2CA1CBEDB24008DBB60 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		A20AB2CC1CBEDB24008DBB60 /* SceneViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneViewController.swift; sourceTree = "<group>"; };
@@ -94,6 +102,17 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		40437D7B1CC873F300B8685F /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				40437D801CC8744F00B8685F /* palm_diffuse.png */,
+				40437D811CC8744F00B8685F /* palm.obj */,
+				40437D7C1CC8743F00B8685F /* sand.png */,
+				40437D7D1CC8743F00B8685F /* water.png */,
+			);
+			name = Resources;
+			sourceTree = "<group>";
+		};
 		A20AB2BE1CBEDB24008DBB60 = {
 			isa = PBXGroup;
 			children = (
@@ -117,6 +136,7 @@
 		A20AB2C91CBEDB24008DBB60 /* AdvancedGraphicsProject */ = {
 			isa = PBXGroup;
 			children = (
+				40437D7B1CC873F300B8685F /* Resources */,
 				40437D781CC8704900B8685F /* Tree.swift */,
 				A26757C41CC6DE26001DC1D1 /* models */,
 				A20AB2CA1CBEDB24008DBB60 /* AppDelegate.swift */,
@@ -263,9 +283,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				A20AB2D71CBEDB24008DBB60 /* LaunchScreen.storyboard in Resources */,
+				40437D7E1CC8743F00B8685F /* sand.png in Resources */,
 				A20AB2D41CBEDB24008DBB60 /* Assets.xcassets in Resources */,
+				40437D831CC8744F00B8685F /* palm.obj in Resources */,
 				A26757C51CC6DE26001DC1D1 /* models in Resources */,
 				A20AB2D21CBEDB24008DBB60 /* Main.storyboard in Resources */,
+				40437D7F1CC8743F00B8685F /* water.png in Resources */,
+				40437D821CC8744F00B8685F /* palm_diffuse.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
