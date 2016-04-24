@@ -14,13 +14,16 @@ import simd
 
 
 let terrainSize:Float = 64
+let terrainHeight:Float = 2.5
+let terrainSmoothness:Float = 0.95
 
 let waterLevel:Float = -0.5
 
 let cameraHeight:Float = 0.3
 
 let sharedUniformOffset:size_t = 0
-let waterUniformOffset:size_t = sharedUniformOffset + sizeof(Uniforms)
+let terrainUniformOffset:size_t = sharedUniformOffset + sizeof(Uniforms)
+let waterUniformOffset:size_t = terrainUniformOffset + sizeof(InstanceUniforms)
 
 
 class Renderer {
@@ -46,6 +49,9 @@ class Renderer {
     
     var waterMesh:Mesh! = nil
     var waterMaterial:Material! = nil
+    
+    var terrainMesh:Mesh! = nil
+    var terrainMaterial:Material! = nil
 
     init(layer:CAMetalLayer) {
         self.layer = layer
@@ -79,24 +85,39 @@ class Renderer {
         self.loadMeshes()
         self.loadTextures()
         self.buildUniformBuffer()
+        self.populateTerrainUniforms()
         self.populateWaterUniforms()
     }
     
     func loadMeshes() {
+        self.terrainMesh = TerrainMesh(width:terrainSize, height: terrainHeight, iterations: 6, smoothness: terrainSmoothness, device: self.device)
+        
         self.waterMesh = PlaneMesh(width: terrainSize, depth: terrainSize, divX: 32, divZ: 32, texScale: 10, opacity: 0.2, device: self.device)
     }
     
     func loadTextures() {
         let textureLoader:TextureLoader = TextureLoader.sharedInstance
         
+        let terrainTexture:MTLTexture = textureLoader.texture2D("sand", mipmapped:true, device:self.device)
+        self.terrainMaterial = Material(diffuseTexture: terrainTexture, alphaTestEnabled: false, blendEnabled: false, depthWriteEnabled: false, device: self.device)
+        
+        
         let waterTexture:MTLTexture = textureLoader.texture2D("water", mipmapped:true, device:self.device)
-        waterMaterial = Material(diffuseTexture: waterTexture, alphaTestEnabled: false, blendEnabled: true, depthWriteEnabled: false, device: self.device)
+        self.waterMaterial = Material(diffuseTexture: waterTexture, alphaTestEnabled: false, blendEnabled: true, depthWriteEnabled: false, device: self.device)
     }
     
     func buildUniformBuffer() {
         let uniformBufferLength = waterUniformOffset + sizeof(InstanceUniforms)
         self.uniformBuffer = self.device.newBufferWithLength(uniformBufferLength, options: MTLResourceOptions.CPUCacheModeDefaultCache)
         self.uniformBuffer.label = "Uniforms"
+    }
+    
+    func populateTerrainUniforms() {
+        let terrainModelMatrix:matrix_float4x4 = matrix_identity()
+        
+        let terrainNormalMatrix = matrix_transpose(matrix_invert(matrix_extract_linear(terrainModelMatrix)))
+        var terrainUniforms:InstanceUniforms = InstanceUniforms(modelMatrix: terrainModelMatrix, normalMatrix: terrainNormalMatrix)
+        memcpy(self.uniformBuffer.contents() + terrainUniformOffset, &terrainUniforms, sizeof(InstanceUniforms))
     }
     
     func populateWaterUniforms() {
@@ -107,12 +128,46 @@ class Renderer {
         memcpy(self.uniformBuffer.contents() + waterUniformOffset, &waterUniforms, sizeof(InstanceUniforms))
     }
     
+    func constrainToTerrain(position:vector_float3) -> vector_float3 {
+        var newPosition:vector_float3 = position
+        let halfWidth:Float = (self.terrainMesh as! TerrainMesh).width * 0.5
+        let halfDepth:Float = (self.terrainMesh as! TerrainMesh).depth * 0.5
+        var newPosArray = [Float]()
+        
+        if(newPosition.x < -halfWidth) {
+            newPosition.x = -halfWidth
+        } else if (newPosition.x > halfWidth) {
+            newPosition.x = halfWidth
+        }
+        
+        if(newPosition.z < -halfDepth) {
+            newPosition.z = -halfDepth
+        } else if (newPosition.z > halfDepth) {
+            newPosition.z = halfDepth
+        }
+        
+        newPosition.y = (self.terrainMesh as! TerrainMesh).heightAtPositionX(newPosition.x, z: newPosition.z)
+        newPosArray.append(newPosition.x)
+        newPosArray.append(newPosition.y)
+        newPosArray.append(newPosition.z)
+        
+        
+        
+        if(newPosition.y < waterLevel) {
+            newPosition.y  = waterLevel
+        }
+        
+        return newPosition
+    }
+    
     func updateCamera() {
         var camPosition:vector_float3 = self.cameraPosition
         
         self.cameraHeading += self.angularVelocity * self.frameDuration
         camPosition.x += -sin(self.cameraHeading) * self.velocity * self.frameDuration
         camPosition.z += -cos(self.cameraHeading) * self.velocity * self.frameDuration
+        camPosition = self.constrainToTerrain(camPosition)
+        print (camPosition.y)
         camPosition.y += cameraHeight
         
         self.cameraPosition = camPosition
@@ -192,6 +247,12 @@ class Renderer {
             encoder.setCullMode(MTLCullMode.None)
             
             encoder.setVertexBuffer(self.uniformBuffer, offset: sharedUniformOffset, atIndex: 1)
+            
+            encoder.setVertexBuffer(self.uniformBuffer, offset: terrainUniformOffset, atIndex: 2)
+            self.drawInstancedMesh(self.terrainMesh, encoder: encoder, material: self.terrainMaterial, instanceCount: 1)
+            
+            encoder.setVertexBuffer(self.uniformBuffer, offset: waterUniformOffset, atIndex: 2)
+            self.drawInstancedMesh(self.waterMesh, encoder: encoder, material: self.waterMaterial, instanceCount: 1)
             
             encoder.endEncoding()
             commandBuffer.presentDrawable(drawable)

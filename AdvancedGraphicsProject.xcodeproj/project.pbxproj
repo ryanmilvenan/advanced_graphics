@@ -25,6 +25,7 @@
 		A20AB2D71CBEDB24008DBB60 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = A20AB2D51CBEDB24008DBB60 /* LaunchScreen.storyboard */; };
 		A20AB2E21CBEDB25008DBB60 /* AdvancedGraphicsProjectTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20AB2E11CBEDB25008DBB60 /* AdvancedGraphicsProjectTests.swift */; };
 		A20AB2ED1CBEDB25008DBB60 /* AdvancedGraphicsProjectUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20AB2EC1CBEDB25008DBB60 /* AdvancedGraphicsProjectUITests.swift */; };
+		A26757CE1CC9FEB2001DC1D1 /* sand.png in Resources */ = {isa = PBXBuildFile; fileRef = A26757CD1CC9FEB2001DC1D1 /* sand.png */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -41,6 +42,13 @@
 			proxyType = 1;
 			remoteGlobalIDString = A20AB2C61CBEDB24008DBB60;
 			remoteInfo = AdvancedGraphicsProject;
+		};
+		A26757CA1CC99898001DC1D1 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A26757C61CC99898001DC1D1 /* AlphaBlending.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 83DBFC151A3F5C0000630BA1;
+			remoteInfo = AlphaBlending;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -69,6 +77,8 @@
 		A20AB2E81CBEDB25008DBB60 /* AdvancedGraphicsProjectUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AdvancedGraphicsProjectUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		A20AB2EC1CBEDB25008DBB60 /* AdvancedGraphicsProjectUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvancedGraphicsProjectUITests.swift; sourceTree = "<group>"; };
 		A20AB2EE1CBEDB25008DBB60 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		A26757C61CC99898001DC1D1 /* AlphaBlending.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = AlphaBlending.xcodeproj; path = "../../tests/sample-code/objc/10-AlphaBlending/AlphaBlending.xcodeproj"; sourceTree = "<group>"; };
+		A26757CD1CC9FEB2001DC1D1 /* sand.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = sand.png; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -99,6 +109,7 @@
 		40437D7B1CC873F300B8685F /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				A26757CD1CC9FEB2001DC1D1 /* sand.png */,
 				40437D7D1CC8743F00B8685F /* water.png */,
 			);
 			name = Resources;
@@ -126,6 +137,7 @@
 		A20AB2BE1CBEDB24008DBB60 = {
 			isa = PBXGroup;
 			children = (
+				A26757C61CC99898001DC1D1 /* AlphaBlending.xcodeproj */,
 				A20AB2C91CBEDB24008DBB60 /* AdvancedGraphicsProject */,
 				A20AB2E01CBEDB25008DBB60 /* AdvancedGraphicsProjectTests */,
 				A20AB2EB1CBEDB25008DBB60 /* AdvancedGraphicsProjectUITests */,
@@ -180,6 +192,14 @@
 				A20AB2EE1CBEDB25008DBB60 /* Info.plist */,
 			);
 			path = AdvancedGraphicsProjectUITests;
+			sourceTree = "<group>";
+		};
+		A26757C71CC99898001DC1D1 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				A26757CB1CC99898001DC1D1 /* AlphaBlending.app */,
+			);
+			name = Products;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -275,6 +295,12 @@
 			mainGroup = A20AB2BE1CBEDB24008DBB60;
 			productRefGroup = A20AB2C81CBEDB24008DBB60 /* Products */;
 			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = A26757C71CC99898001DC1D1 /* Products */;
+					ProjectRef = A26757C61CC99898001DC1D1 /* AlphaBlending.xcodeproj */;
+				},
+			);
 			projectRoot = "";
 			targets = (
 				A20AB2C61CBEDB24008DBB60 /* AdvancedGraphicsProject */,
@@ -284,12 +310,23 @@
 		};
 /* End PBXProject section */
 
+/* Begin PBXReferenceProxy section */
+		A26757CB1CC99898001DC1D1 /* AlphaBlending.app */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.application;
+			path = AlphaBlending.app;
+			remoteRef = A26757CA1CC99898001DC1D1 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
+
 /* Begin PBXResourcesBuildPhase section */
 		A20AB2C51CBEDB24008DBB60 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				A20AB2D71CBEDB24008DBB60 /* LaunchScreen.storyboard in Resources */,
+				A26757CE1CC9FEB2001DC1D1 /* sand.png in Resources */,
 				A20AB2D41CBEDB24008DBB60 /* Assets.xcassets in Resources */,
 				A20AB2D21CBEDB24008DBB60 /* Main.storyboard in Resources */,
 				40437D7F1CC8743F00B8685F /* water.png in Resources */,
