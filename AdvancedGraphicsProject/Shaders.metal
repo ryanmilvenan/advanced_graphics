@@ -16,10 +16,10 @@ constant float kAlphaTestReferenceValue = 0.5;
 
 struct Vertex
 {
-    packed_float4 position [[attribute(0)]];
-    packed_float4 normal [[attribute(1)]];
-    packed_float4 diffuseColor [[attribute(2)]];
-    packed_float2 texCoords [[attribute(3)]];
+    float4 position [[attribute(0)]];
+    float4 normal [[attribute(1)]];
+    float4 diffuseColor [[attribute(2)]];
+    float2 texCoords [[attribute(3)]];
 };
 
 struct ProjectedVertex

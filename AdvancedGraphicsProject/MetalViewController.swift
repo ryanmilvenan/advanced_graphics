@@ -7,31 +7,25 @@
 //
 
 import UIKit
+import MetalKit
 
 let rotationSpeed:Float = 3
 
-class MetalViewController: UIViewController {
+class MetalViewController: UIViewController, MTKViewDelegate {
     
     var renderer:Renderer! = nil
-    var displayLink:CADisplayLink! = nil
     
     override func viewDidLoad() {
         
         super.viewDidLoad()
         
-        self.renderer = Renderer(layer: self.metalView().metalLayer())
-        self.displayLink = CADisplayLink(target: self, selector: #selector(MetalViewController.displayLinkDidFire))
-        self.displayLink.addToRunLoop(NSRunLoop.mainRunLoop(), forMode: NSRunLoopCommonModes)
-    }
-    
-    func metalView() -> MetalView {
-        return self.view as! MetalView
+        self.renderer = Renderer(view: self.view as! MTKView, delegate:self)
     }
     
     func updateMotion() {
-        self.renderer.updateFrameDuration(Float(self.displayLink.duration))
+//        self.renderer.updateFrameDuration(Float((self.view as? MTKView).))
         
-        if let touch = self.metalView().currentTouch {
+        if let touch = (self.view as! MetalView).currentTouch {
             let bounds:CGRect = self.view.bounds
             let rotationScale = (CGRectGetMidX(bounds) - touch.locationInView(self.view).x) / bounds.size.width
             
@@ -44,8 +38,16 @@ class MetalViewController: UIViewController {
         
     }
     
-    func displayLinkDidFire() {
-        self.updateMotion()
+    func drawInMTKView(view: MTKView) {
         self.renderer.draw()
+        self.updateMotion()
+    }
+    
+    func mtkView(view: MTKView, drawableSizeWillChange size: CGSize) {
+        self.renderer.reshape()
+    }
+    
+    func view(view: MTKView, willLayoutWithSize size: CGSize) {
+        self.renderer.reshape()
     }
 }

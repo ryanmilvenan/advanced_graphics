@@ -12,7 +12,7 @@ import simd
 class PlaneMesh: Mesh {
     
     var vertices:[Vertex]
-    var indices:[UInt16]
+    var indices:[Index]
     
     init(width:Float, depth:Float, divX:Int, divZ:Int, texScale:Float, opacity:Float, device:MTLDevice) {
         self.vertices = []
@@ -44,10 +44,10 @@ class PlaneMesh: Mesh {
         var z:Float = depth * -0.5
         
         var current:Int = 0
-        for _ in 0 ..< (divZ) {
+        for _ in 0 ..< (divZ + 1) {
             
             var x:Float = width * -0.5
-            for _ in 0 ..< (divX)  {
+            for _ in 0 ..< (divX + 1)  {
                 
                 self.vertices[current].position = float4(x, y, z, 1);
                 
@@ -69,19 +69,19 @@ class PlaneMesh: Mesh {
         for currentZ in 0 ..< divZ {
             for currentX in 0 ..< divX {
                 let v:Int = (currentX * divX) + currentZ
-                self.indices.append(UInt16(v));
-                self.indices.append(UInt16(v + divX));
-                self.indices.append(UInt16(v + divX + 1));
-                self.indices.append(UInt16(v + divX + 1));
-                self.indices.append(UInt16(v + 1));
-                self.indices.append(UInt16(v));
+                self.indices.append(Index(v));
+                self.indices.append(Index(v + divX));
+                self.indices.append(Index(v + divX + 1));
+                self.indices.append(Index(v + divX + 1));
+                self.indices.append(Index(v + 1));
+                self.indices.append(Index(v));
             }
         }
         
-        self.vertexBuffer = device.newBufferWithBytes(self.vertices, length: sizeof(Vertex) * self.vertices.count, options: MTLResourceOptions.CPUCacheModeDefaultCache)
+        self.vertexBuffer = device.newBufferWithBytes(self.vertices, length: sizeof(Vertex) * self.vertices.count, options: MTLResourceOptions.OptionCPUCacheModeDefault)
         self.vertexBuffer.label = "Water (Vertices)"
         
-        self.indexBuffer = device.newBufferWithBytes(self.indices, length: sizeof(UInt16) * self.indices.count, options: MTLResourceOptions.CPUCacheModeDefaultCache)
+        self.indexBuffer = device.newBufferWithBytes(self.indices, length: sizeof(Index) * self.indices.count, options: MTLResourceOptions.OptionCPUCacheModeDefault)
         self.indexBuffer.label = "Water (Indicies)"
     }
 }

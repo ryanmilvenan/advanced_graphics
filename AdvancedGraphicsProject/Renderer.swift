@@ -29,7 +29,8 @@ let waterUniformOffset:size_t = terrainUniformOffset + sizeof(InstanceUniforms)
 
 class Renderer {
     
-    var layer:CAMetalLayer! = nil
+    var mtkView:MTKView! = nil
+    var mtkViewDelegate:MTKViewDelegate! = nil
     
     var device:MTLDevice! = nil
     var commandQueue: MTLCommandQueue! = nil
@@ -41,6 +42,8 @@ class Renderer {
     var depthState: MTLDepthStencilState! = nil
     
     var uniformBuffer:MTLBuffer! = nil
+    var projMatrix:float4x4! = nil
+    var viewMatrix:float4x4! = nil
     
     var cameraPosition:vector_float3 = vector_float3()
     var cameraHeading:Float = 0
@@ -54,20 +57,22 @@ class Renderer {
     var terrainMesh:Mesh! = nil
     var terrainMaterial:Material! = nil
 
-    init(layer:CAMetalLayer) {
-        self.layer = layer
-        self.buildMetal()
+    init(view:MTKView, delegate:MTKViewDelegate) {
+        self.mtkView = view
+        self.mtkViewDelegate = delegate
+        self.setupMetal()
         self.buildResources()
+        self.reshape()
     }
     
-    func buildMetal() {
+    func setupMetal() {
         self.device = MTLCreateSystemDefaultDevice()
         guard device != nil else {
             print("Metal is not supported on this device")
             return
         }
-        self.layer.device = self.device
-        self.layer.pixelFormat = MTLPixelFormat.BGRA8Unorm
+    
+        //self.layer.pixelFormat = MTLPixelFormat.BGRA8Unorm
         
         self.commandQueue = self.device.newCommandQueue()
         
@@ -80,6 +85,12 @@ class Renderer {
         samplerDescriptor.tAddressMode = MTLSamplerAddressMode.Repeat
         
         self.sampler = device.newSamplerStateWithDescriptor(samplerDescriptor)
+        
+        guard let metalView = self.mtkView else {print("MTKView not found"); return}
+        metalView.delegate = self.mtkViewDelegate
+        metalView.device = self.device
+        metalView.colorPixelFormat = MTLPixelFormat.BGRA8Unorm
+        self.mtkView = metalView
     }
     
     func buildResources() {
@@ -98,18 +109,17 @@ class Renderer {
     
     func loadTextures() {
         let textureLoader:TextureLoader = TextureLoader.sharedInstance
-        
         let terrainTexture:MTLTexture = textureLoader.texture2D("sand", mipmapped:true, device:self.device)
-        self.terrainMaterial = Material(diffuseTexture: terrainTexture, alphaTestEnabled: false, blendEnabled: false, depthWriteEnabled: false, device: self.device)
+        self.terrainMaterial = Material(diffuseTexture: terrainTexture, alphaTestEnabled: false, blendEnabled: false, depthWriteEnabled: true, device: self.device)
         
         
         let waterTexture:MTLTexture = textureLoader.texture2D("water", mipmapped:true, device:self.device)
-        self.waterMaterial = Material(diffuseTexture: waterTexture, alphaTestEnabled: false, blendEnabled: true, depthWriteEnabled: false, device: self.device)
+        self.waterMaterial = Material(diffuseTexture: waterTexture, alphaTestEnabled: false, blendEnabled: true, depthWriteEnabled: true, device: self.device)
     }
     
     func buildUniformBuffer() {
         let uniformBufferLength = waterUniformOffset + sizeof(InstanceUniforms)
-        self.uniformBuffer = self.device.newBufferWithLength(uniformBufferLength, options: MTLResourceOptions.CPUCacheModeDefaultCache)
+        self.uniformBuffer = self.device.newBufferWithLength(uniformBufferLength, options: MTLResourceOptions.OptionCPUCacheModeDefault)
         self.uniformBuffer.label = "Uniforms"
     }
     
@@ -119,16 +129,14 @@ class Renderer {
         //let terrainNormalMatrix = matrix_transpose(matrix_invert(matrix_extract_linear(terrainModelMatrix)))
         let terrainNormalMatrix = matrix_extract_linear(terrainModelMatrix).transpose.inverse
         var terrainUniforms:InstanceUniforms = InstanceUniforms(modelMatrix: terrainModelMatrix, normalMatrix: terrainNormalMatrix)
-        print("Terrain Uniform offset \(self.uniformBuffer.contents() + terrainUniformOffset)")
         memcpy(self.uniformBuffer.contents() + terrainUniformOffset, &terrainUniforms, sizeof(InstanceUniforms))
     }
     
     func populateWaterUniforms() {
         let waterOffsetVec:float3 = float3(0, waterLevel, 0)
-        let waterModelMatrix = matrix_translation(waterOffsetVec)
+        let waterModelMatrix = translationMatrix(waterOffsetVec)
         let waterNormalMatrix = matrix_extract_linear(waterModelMatrix).transpose.inverse
         var waterUniforms:InstanceUniforms = InstanceUniforms(modelMatrix: waterModelMatrix, normalMatrix: waterNormalMatrix)
-        print("Water Uniforms: \(waterUniforms)")
 
         memcpy(self.uniformBuffer.contents() + waterUniformOffset, &waterUniforms, sizeof(InstanceUniforms))
     }
@@ -169,19 +177,16 @@ class Renderer {
         camPosition.y += cameraHeight
         
         self.cameraPosition = camPosition
+        print("Cam Position: \(self.cameraPosition)")
+        self.reshape()
         
-        let Y:vector_float3 = vector_float3(0, 1, 0)
-        let viewMatrix:float4x4 = matrix_rotation(Y, angle: self.cameraHeading) * matrix_translation(-self.cameraPosition)
-        let aspect:Float = Float(self.layer.drawableSize.width) / Float(self.layer.drawableSize.height)
-        let fov:Float = (aspect > 1) ? Float(M_PI / 4) : Float(M_PI / 3)
-        let projectionMatrix:float4x4 = matrix_perspective_projection(aspect, fovy: fov, near: 0.1, far: 100)
-        let viewProjectionMatrix = projectionMatrix * viewMatrix
+        let viewProjectionMatrix = projMatrix * viewMatrix
         var uniforms:Uniforms = Uniforms(viewProjection: viewProjectionMatrix)
         memcpy(self.uniformBuffer.contents() + sharedUniformOffset, &uniforms, sizeof(Uniforms))
     }
     
     func buildDepthTexture() {
-        let drawableSize:CGSize = self.layer.drawableSize
+        let drawableSize:CGSize = self.mtkView.drawableSize
         let descriptor:MTLTextureDescriptor = MTLTextureDescriptor.texture2DDescriptorWithPixelFormat(MTLPixelFormat.Depth32Float, width: Int(drawableSize.width), height: Int(drawableSize.height), mipmapped: false)
         self.depthTexture = self.device.newTextureWithDescriptor(descriptor)
         self.depthTexture.label = "Depth Texture"
@@ -224,19 +229,52 @@ class Renderer {
         self.angularVelocity = v
     }
     
+    func reshape() {
+        
+        self.viewMatrix = createViewMatrix()
+        if let drawable = self.mtkView.currentDrawable {
+            let aspect = Float(drawable.layer.drawableSize.width / drawable.layer.drawableSize.height)
+            let fov:Float = (aspect > 1) ? Float(M_PI / 4) : Float(M_PI / 3)
+            //self.projectionMatrix = matrix_perspective_projection(aspect, fovy: fov, near: 0.1, far: 100)
+            self.projMatrix = projectionMatrix(0.1, far: 100, aspect: aspect, fovy: fov)
+        }
+        
+//        projectionMatrix = matrixFromPerspectiveFOVAspectLH(
+//            fovY: Float(65 * M_PI / 180),
+//            aspect: aspect,
+//            nearZ: 0.1, farZ: 100
+//        )
+
+    }
+    
+    func createViewMatrix() -> float4x4 {
+        let Y:vector_float3 = vector_float3(0, 1, 0)
+        let cameraPosition = self.cameraPosition
+        return rotationMatrix(self.cameraHeading, Y) * translationMatrix(cameraPosition)
+    }
+    
+    
     func draw() {
         self.updateCamera()
         
-        if let drawable:CAMetalDrawable = self.layer.nextDrawable() {
+        if let drawable = self.mtkView.currentDrawable, renderPassDescriptor = self.mtkView.currentRenderPassDescriptor {
             if let depthTex = self.depthTexture {
-                if depthTex.width != Int(self.layer.drawableSize.width) || self.depthTexture.height != Int(self.layer.drawableSize.height) {
+                if depthTex.width != Int(self.mtkView.drawableSize.width) || self.depthTexture.height != Int(self.mtkView.drawableSize.height) {
                     self.buildDepthTexture()
                 }
             } else {
                 self.buildDepthTexture()
             }
             
-            let renderPassDescriptor = self.newRenderPassDescriptorWithColorAttachmentTexture(drawable.texture)
+            renderPassDescriptor.colorAttachments[0].texture = drawable.texture
+            renderPassDescriptor.colorAttachments[0].loadAction = MTLLoadAction.Clear
+            renderPassDescriptor.colorAttachments[0].storeAction = MTLStoreAction.Store
+            renderPassDescriptor.colorAttachments[0].clearColor = MTLClearColorMake(0.2, 0.5, 0.95, 1.0)
+            
+            renderPassDescriptor.depthAttachment.texture = self.depthTexture
+            renderPassDescriptor.depthAttachment.loadAction = MTLLoadAction.Clear
+            renderPassDescriptor.depthAttachment.storeAction = MTLStoreAction.Store
+            renderPassDescriptor.depthAttachment.clearDepth = 1.0
             
             let commandBuffer:MTLCommandBuffer = self.commandQueue.commandBuffer()
             

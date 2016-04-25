@@ -22,7 +22,7 @@ class TerrainMesh:Mesh {
     var vertexCount:size_t
     var indexCount:size_t
     var vertices:[Vertex]
-    var indices:[UInt16]
+    var indices:[Index]
     internal private(set) var width:Float
     internal private(set) var depth:Float
     internal private(set) var height:Float
@@ -90,10 +90,10 @@ class TerrainMesh:Mesh {
         self.computeMeshNormals()
         self.generateIndices()
         
-        self.vertexBuffer = device.newBufferWithBytes(self.vertices, length: sizeof(Vertex) * self.vertexCount, options: MTLResourceOptions.CPUCacheModeDefaultCache)
+        self.vertexBuffer = device.newBufferWithBytes(self.vertices, length: sizeof(Vertex) * self.vertexCount, options: MTLResourceOptions.OptionCPUCacheModeDefault)
         self.vertexBuffer.label = "Vertices (Terrain)"
         
-        self.indexBuffer = device.newBufferWithBytes(self.indices, length: sizeof(UInt16) * self.indexCount, options: MTLResourceOptions.CPUCacheModeDefaultCache)
+        self.indexBuffer = device.newBufferWithBytes(self.indices, length: sizeof(Index) * self.indexCount, options: MTLResourceOptions.OptionCPUCacheModeDefault)
         self.indexBuffer.label = "Indices (Terrain)"
     }
     
@@ -110,8 +110,8 @@ class TerrainMesh:Mesh {
         let y11:Float = self.vertices[r1 * self.stride + c1].position.y;
         let y10:Float = self.vertices[r1 * self.stride + c0].position.y;
         
-        let yMean:Float = (y00 + y01 + y11 + y10) / 4
-        let error = (Float(((Double((arc4random() / UInt32.max))) - 0.5) * 2)) * variance
+        let yMean:Float = (y00 + y01 + y11 + y10) * 0.25
+        let error = (((Float(arc4random()) / Float(UInt32.max)) - 0.5) * 2) * variance
         let y:Float = yMean + error
         
         self.vertices[rmid * self.stride + cmid].position.y = y
@@ -133,13 +133,13 @@ class TerrainMesh:Mesh {
         let y10:Float = self.vertices[r1 * self.stride + c0].position.y;
 
         var error:Float = 0
-        error = (Float(((Double((arc4random() / UInt32.max))) - 0.5) * 2)) * variance
+        error = (((Float(arc4random()) / Float(UInt32.max)) - 0.5) * 2) * variance
         self.vertices[r0 * self.stride + cmid].position.y = (y00 + y01) * 0.5 + error;
-        error = (Float(((Double((arc4random() / UInt32.max))) - 0.5) * 2)) * variance
+        error = (((Float(arc4random()) / Float(UInt32.max)) - 0.5) * 2) * variance
         self.vertices[rmid * self.stride + c0].position.y = (y00 + y10) * 0.5 + error;
-        error = (Float(((Double((arc4random() / UInt32.max))) - 0.5) * 2)) * variance
+        error = (((Float(arc4random()) / Float(UInt32.max)) - 0.5) * 2) * variance
         self.vertices[rmid * self.stride + c1].position.y = (y01 + y11) * 0.5 + error
-        error = (Float(((Double((arc4random() / UInt32.max))) - 0.5) * 2)) * variance
+        error = (((Float(arc4random()) / Float(UInt32.max)) - 0.5) * 2) * variance
         self.vertices[r1 * self.stride + cmid].position.y = (y01 + y11) * 0.5 + error;
 
 
@@ -166,19 +166,19 @@ class TerrainMesh:Mesh {
         for row in 0 ..< self.stride {
             for column in 0 ..< self.stride {
                 if row > 0 && column > 0 && row < (self.stride - 1) && column < (self.stride - 1) {
-                    let L:float4 = self.vertices[row * self.stride + (column - 1)].position;
-                    let R:float4 = self.vertices[row * self.stride + (column + 1)].position;
-                    let U:float4 = self.vertices[(row - 1) * self.stride + column].position;
-                    let D:float4 = self.vertices[(row + 1) * self.stride + column].position;
-                    let T:float3 = float3(R.x - L.x, (R.y - L.y) * yScale, 0);
-                    let B:float3 = float3(0, (D.y - U.y) * yScale, D.z - U.z);
-                    let N:float3 = vector_cross(B, T);
-                    var normal:float4 = float4(N.x, N.y, N.z, 0);
+                    let leftAdj:float4 = self.vertices[row * self.stride + (column - 1)].position;
+                    let rightAdj:float4 = self.vertices[row * self.stride + (column + 1)].position;
+                    let upAdj:float4 = self.vertices[(row - 1) * self.stride + column].position;
+                    let downAdj:float4 = self.vertices[(row + 1) * self.stride + column].position;
+                    let top:float3 = float3(rightAdj.x - leftAdj.x, (rightAdj.y - leftAdj.y) * yScale, 0);
+                    let bottom:float3 = float3(0, (downAdj.y - upAdj.y) * yScale, downAdj.z - upAdj.z);
+                    let btCross:float3 = vector_cross(bottom, top);
+                    var normal:float4 = float4(btCross.x, btCross.y, btCross.z, 0);
                     normal = vector_normalize(normal);
                     self.vertices[row * self.stride + column].normal = normal;
                 } else {
-                    let N:float4 = float4(0, 1, 0, 0);
-                    self.vertices[row * self.stride + column].normal = N;
+                    let normal:float4 = float4(0, 1, 0, 0);
+                    self.vertices[row * self.stride + column].normal = normal;
                 }
             }
         }
@@ -187,12 +187,12 @@ class TerrainMesh:Mesh {
     func generateIndices() {
         for row in 0 ..< (self.stride - 1) {
             for column in 0 ..< (self.stride - 1) {
-                self.indices.append(UInt16(row * self.stride + column));
-                self.indices.append(UInt16(((row + 1) * self.stride + column)));
-                self.indices.append(UInt16((row + 1) * self.stride + (column + 1)))
-                self.indices.append(UInt16((row + 1) * self.stride + (column + 1)))
-                self.indices.append(UInt16((row * self.stride + (column + 1))))
-                self.indices.append(UInt16((row * self.stride + column)));
+                self.indices.append(Index(row * self.stride + column));
+                self.indices.append(Index(((row + 1) * self.stride + column)));
+                self.indices.append(Index((row + 1) * self.stride + (column + 1)))
+                self.indices.append(Index((row + 1) * self.stride + (column + 1)))
+                self.indices.append(Index((row * self.stride + (column + 1))))
+                self.indices.append(Index((row * self.stride + column)));
             }
         }
     }
@@ -216,30 +216,15 @@ class TerrainMesh:Mesh {
         let dx:Float = fx - Float(ix)
         let dz:Float = fz - Float(iz)
         
-        if let vB = self.vertexBuffer {
-            var offset:Int = (iz * self.stride + ix)
-            var vertex = UnsafeMutablePointer<Vertex>(vB.contents()).advancedBy(offset).memory
-            let y00:Float = vertex.position.y
-            
-            offset = (iz * self.stride + (ix + 1))
-            vertex = UnsafeMutablePointer<Vertex>(vB.contents()).advancedBy(offset).memory
-            let y01:Float = vertex.position.y
-            
-            offset = (iz + 1) * self.stride + ix
-            vertex = UnsafeMutablePointer<Vertex>(vB.contents()).advancedBy(offset).memory
-            let y10:Float = vertex.position.y
-            
-            offset = (iz + 1) * self.stride + (ix + 1)
-            vertex = UnsafeMutablePointer<Vertex>(vB.contents()).advancedBy(offset).memory
-            let y11:Float = vertex.position.y
-            
-            let yTop:Float = ((1 - dx) * y00) + (dx * y01)
-            let yBot:Float = ((1 - dx) * y10) + (dx * y11)
-            let y:Float = ((1 - dz) * yTop) + (dz * yBot)
-            
-            return y
-        }
+        let y00:Float = self.vertices[(iz * self.stride + ix)].position.y
+        let y01:Float = self.vertices[(iz * self.stride + (ix + 1))].position.y
+        let y10:Float = self.vertices[((iz + 1) * self.stride + ix)].position.y
+        let y11:Float = self.vertices[((iz + 1) * self.stride + (ix + 1))].position.y
         
-        return 0
+        let yTop:Float = ((1 - dx) * y00) + (dx * y01)
+        let yBot:Float = ((1 - dx) * y10) + (dx * y11)
+        let y:Float = ((1 - dz) * yTop) + (dz * yBot)
+        
+        return y
     }
 }

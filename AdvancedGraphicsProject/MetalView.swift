@@ -8,18 +8,11 @@
 
 import Foundation
 import UIKit
+import MetalKit
 
-class MetalView: UIView {
+class MetalView: MTKView {
     
     var currentTouch:UITouch? = nil
-    
-    override class func layerClass() -> AnyClass {
-        return CAMetalLayer.self
-    }
-    
-    func metalLayer() -> CAMetalLayer {
-        return self.layer as! CAMetalLayer
-    }
     
     override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?) {
         if let touch = touches.first {

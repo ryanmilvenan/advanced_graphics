@@ -9,7 +9,7 @@
 import Foundation
 import simd
 
-typealias Index = __uint16_t
+typealias Index = UInt16
 
 struct Uniforms {
     var viewProjection:float4x4
@@ -21,10 +21,10 @@ struct InstanceUniforms {
 }
 
 struct Vertex {
-    var position:packed_float4
-    var normal:packed_float4
-    var diffuseColor:packed_float4
-    var texCoords:packed_float2
+    var position:float4
+    var normal:float4
+    var diffuseColor:float4
+    var texCoords:float2
 
     init(pos:float4, norm:float4, diffColor:float4, tex:float2) {
         position = pos

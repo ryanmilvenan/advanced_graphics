@@ -17,7 +17,7 @@ class Material {
     
     init(diffuseTexture:MTLTexture, alphaTestEnabled:Bool, blendEnabled:Bool, depthWriteEnabled:Bool, device:MTLDevice) {
         self.diffuseTexture = diffuseTexture
-        let fragmentFunction:String = alphaTestEnabled ? "fragment_alpha_test" : "fragmentShader"
+        let fragmentFunction:String = "fragmentShader"
         
         let library:MTLLibrary = device.newDefaultLibrary()!
         

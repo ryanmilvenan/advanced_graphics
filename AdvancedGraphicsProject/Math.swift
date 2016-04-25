@@ -17,82 +17,52 @@ func matrix_identity() -> float4x4 {
     return float4x4(matrix_identity_float4x4)
 }
 
-func matrix_rotation(axis:float3, angle:Float) -> float4x4 {
-    let c:Float = cos(angle)
-    let s:Float = sin(angle)
-    
-    var X:float4 = float4()
-    X.x = axis.x * axis.x + (1 - axis.x * axis.x) * c;
-    X.y = axis.x * axis.y * (1 - c) - axis.z*s;
-    X.z = axis.x * axis.z * (1 - c) + axis.y * s;
-    X.w = 0.0;
-    
-    var Y:float4 = float4()
-    Y.x = axis.x * axis.y * (1 - c) + axis.z * s;
-    Y.y = axis.y * axis.y + (1 - axis.y * axis.y) * c;
-    Y.z = axis.y * axis.z * (1 - c) - axis.x * s;
-    Y.w = 0.0;
-    
-    var Z:float4 = float4()
-    Z.x = axis.x * axis.z * (1 - c) - axis.y * s;
-    Z.y = axis.y * axis.z * (1 - c) + axis.x * s;
-    Z.z = axis.z * axis.z + (1 - axis.z * axis.z) * c;
-    Z.w = 0.0;
-    
-    var W:float4 = float4()
-    W.x = 0.0;
-    W.y = 0.0;
-    W.z = 0.0;
-    W.w = 1.0;
-    
-    let m:float4x4 = float4x4([X, Y, Z, W])
-    return m
+func translationMatrix(position: float3) -> float4x4 {
+    let X = vector_float4(1, 0, 0, 0)
+    let Y = vector_float4(0, 1, 0, 0)
+    let Z = vector_float4(0, 0, 1, 0)
+    let W = vector_float4(position.x, position.y, position.z, 1)
+    return float4x4([X, Y, Z, W])
 }
 
-func matrix_translation(t:float3) -> float4x4 {
-    let X:float4 = float4(1, 0, 0 ,0)
-    let Y:float4 = float4(0, 1, 0 ,0)
-    let Z:float4 = float4(0, 0, 1 ,0)
-    let W:float4 = float4(t.x, t.y, t.z ,1)
-    
-    let m:float4x4 = float4x4([X, Y, Z, W])
-    return m
+func scalingMatrix(scale: Float) -> float4x4 {
+    let X = vector_float4(scale, 0, 0, 0)
+    let Y = vector_float4(0, scale, 0, 0)
+    let Z = vector_float4(0, 0, scale, 0)
+    let W = vector_float4(0, 0, 0, 1)
+    return float4x4([X, Y, Z, W])
 }
 
-func matrix_scale(s:float3) -> float4x4 {
-    let X:float4 = float4(s.x,   0,   0, 0)
-    let Y:float4 = float4(  0, s.y,   0, 0)
-    let Z:float4 = float4(  0,   0, s.z, 0)
-    let W:float4 = float4(  0,   0,   0, 1)
-    
-    let m:float4x4 = float4x4([X, Y, Z, W])
-    return m
+func rotationMatrix(angle: Float, _ axis: vector_float3) -> float4x4 {
+    var X = vector_float4(0, 0, 0, 0)
+    X.x = axis.x * axis.x + (1 - axis.x * axis.x) * cos(angle)
+    X.y = axis.x * axis.y * (1 - cos(angle)) - axis.z * sin(angle)
+    X.z = axis.x * axis.z * (1 - cos(angle)) + axis.y * sin(angle)
+    X.w = 0.0
+    var Y = vector_float4(0, 0, 0, 0)
+    Y.x = axis.x * axis.y * (1 - cos(angle)) + axis.z * sin(angle)
+    Y.y = axis.y * axis.y + (1 - axis.y * axis.y) * cos(angle)
+    Y.z = axis.y * axis.z * (1 - cos(angle)) - axis.x * sin(angle)
+    Y.w = 0.0
+    var Z = vector_float4(0, 0, 0, 0)
+    Z.x = axis.x * axis.z * (1 - cos(angle)) - axis.y * sin(angle)
+    Z.y = axis.y * axis.z * (1 - cos(angle)) + axis.x * sin(angle)
+    Z.z = axis.z * axis.z + (1 - axis.z * axis.z) * cos(angle)
+    Z.w = 0.0
+    let W = vector_float4(0, 0, 0, 1)
+    return float4x4([X, Y, Z, W])
 }
 
-func matrix_scale_uniform(s:Float) -> float4x4 {
-    let X:float4 = float4(s, 0, 0, 0)
-    let Y:float4 = float4(0, s, 0, 0)
-    let Z:float4 = float4(0, 0, s, 0)
-    let W:float4 = float4(0, 0, 0, 1)
-    
-    let m:float4x4 = float4x4([X, Y, Z, W])
-    return m
-}
-
-func matrix_perspective_projection(aspect:Float, fovy:Float, near:Float, far:Float) -> float4x4 {
-    let yScale:Float = 1 / tan(fovy * 0.5)
-    let xScale:Float = yScale / aspect
-    let zRange:Float = far - near
-    let zScale:Float = -(far + near) / zRange
-    let wzScale:Float = -2 * far * near / zRange
-    
-    let P:float4 = float4(xScale, 0, 0, 0)
-    let Q:float4 = float4(0, yScale, 0, 0)
-    let R:float4 = float4(0, 0, zScale, 0)
-    let S:float4 = float4(0, 0, wzScale,0)
-    
-    let m:float4x4 = float4x4([P, Q, R, S])
-    return m
+func projectionMatrix(near: Float, far: Float, aspect: Float, fovy: Float) ->float4x4 {
+    let scaleY = 1 / tan(fovy * 0.5)
+    let scaleX = scaleY / aspect
+    let scaleZ = -(far + near) / (far - near)
+    let scaleW = -2 * far * near / (far - near)
+    let X = vector_float4(scaleX, 0, 0, 0)
+    let Y = vector_float4(0, scaleY, 0, 0)
+    let Z = vector_float4(0, 0, scaleZ, -1)
+    let W = vector_float4(0, 0, scaleW, 0)
+    return float4x4([X, Y, Z, W])
 }
 
 func matrix_extract_linear(matrix:float4x4) -> float4x4 {
