@@ -2,7 +2,7 @@
 //  MetalViewController.swift
 //  AdvancedGraphicsProject
 //
-//  Created by Mountain on 4/20/16.
+//  Created by Mountain on 4/10/16.
 //  Copyright © 2016 Ryan Milvenan. All rights reserved.
 //
 
@@ -14,6 +14,7 @@ let rotationSpeed:Float = 3
 class MetalViewController: UIViewController, MTKViewDelegate {
     
     var renderer:Renderer! = nil
+    var frameDuration:CFTimeInterval! = 0
     
     override func viewDidLoad() {
         

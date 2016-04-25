@@ -71,19 +71,3 @@ fragment half4 fragmentShader(ProjectedVertex vert [[stage_in]],
     
     return half4(color.r, color.g, color.b, vertexColor.a);
 }
-
-fragment half4 fragment_alpha_test(ProjectedVertex vert [[stage_in]],
-                                           texture2d<float, access::sample> texture [[texture(0)]],
-                                           sampler texSampler [[sampler(0)]])
-{
-    float4 vertexColor = float4(vert.diffuseColor);
-    float4 textureColor = texture.sample(texSampler, vert.texCoords);
-    
-    float diffuseIntensity = max(kMinDiffuseIntensity, dot(normalize(vert.normal.xyz), -kLightDirection));
-    float4 color = diffuseIntensity * textureColor * vertexColor;
-    
-    if (textureColor.a < kAlphaTestReferenceValue)
-        discard_fragment();
-    
-    return half4(color.r, color.g, color.b, vertexColor.a);
-}

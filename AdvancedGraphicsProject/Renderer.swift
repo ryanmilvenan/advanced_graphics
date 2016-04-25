@@ -2,7 +2,7 @@
 //  Renderer.swift
 //  AdvancedGraphicsProject
 //
-//  Created by Mountain on 4/20/16.
+//  Created by Mountain on 4/10/16.
 //  Copyright © 2016 Ryan Milvenan. All rights reserved.
 //
 
@@ -49,7 +49,7 @@ class Renderer {
     var cameraHeading:Float = 0
     var angularVelocity:Float = 0
     var velocity:Float = 0
-    var frameDuration:Float = 1
+    var frameDuration:Float = 0.016
     
     var waterMesh:Mesh! = nil
     var waterMaterial:Material! = nil
@@ -110,11 +110,11 @@ class Renderer {
     func loadTextures() {
         let textureLoader:TextureLoader = TextureLoader.sharedInstance
         let terrainTexture:MTLTexture = textureLoader.texture2D("sand", mipmapped:true, device:self.device)
-        self.terrainMaterial = Material(diffuseTexture: terrainTexture, alphaTestEnabled: false, blendEnabled: false, depthWriteEnabled: true, device: self.device)
+        self.terrainMaterial = Material(diffuseTexture: terrainTexture, blendEnabled: false, depthWriteEnabled: true, device: self.device)
         
         
         let waterTexture:MTLTexture = textureLoader.texture2D("water", mipmapped:true, device:self.device)
-        self.waterMaterial = Material(diffuseTexture: waterTexture, alphaTestEnabled: false, blendEnabled: true, depthWriteEnabled: true, device: self.device)
+        self.waterMaterial = Material(diffuseTexture: waterTexture, blendEnabled: true, depthWriteEnabled: false, device: self.device)
     }
     
     func buildUniformBuffer() {
@@ -235,22 +235,14 @@ class Renderer {
         if let drawable = self.mtkView.currentDrawable {
             let aspect = Float(drawable.layer.drawableSize.width / drawable.layer.drawableSize.height)
             let fov:Float = (aspect > 1) ? Float(M_PI / 4) : Float(M_PI / 3)
-            //self.projectionMatrix = matrix_perspective_projection(aspect, fovy: fov, near: 0.1, far: 100)
             self.projMatrix = projectionMatrix(0.1, far: 100, aspect: aspect, fovy: fov)
         }
-        
-//        projectionMatrix = matrixFromPerspectiveFOVAspectLH(
-//            fovY: Float(65 * M_PI / 180),
-//            aspect: aspect,
-//            nearZ: 0.1, farZ: 100
-//        )
-
     }
     
     func createViewMatrix() -> float4x4 {
         let Y:vector_float3 = vector_float3(0, 1, 0)
         let cameraPosition = self.cameraPosition
-        return rotationMatrix(self.cameraHeading, Y) * translationMatrix(cameraPosition)
+        return rotationMatrix(self.cameraHeading, Y) * translationMatrix(-cameraPosition)
     }
     
     

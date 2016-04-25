@@ -2,7 +2,7 @@
 //  Material.swift
 //  AdvancedGraphicsProject
 //
-//  Created by Mountain on 4/21/16.
+//  Created by Mountain on 4/11/16.
 //  Copyright © 2016 Ryan Milvenan. All rights reserved.
 //
 
@@ -15,15 +15,14 @@ class Material {
     var depthState:MTLDepthStencilState! = nil
     var pipelineState:MTLRenderPipelineState! = nil
     
-    init(diffuseTexture:MTLTexture, alphaTestEnabled:Bool, blendEnabled:Bool, depthWriteEnabled:Bool, device:MTLDevice) {
+    init(diffuseTexture:MTLTexture, blendEnabled:Bool, depthWriteEnabled:Bool, device:MTLDevice) {
         self.diffuseTexture = diffuseTexture
-        let fragmentFunction:String = "fragmentShader"
         
         let library:MTLLibrary = device.newDefaultLibrary()!
         
         let pipelineDescriptor:MTLRenderPipelineDescriptor = MTLRenderPipelineDescriptor()
         pipelineDescriptor.vertexFunction = library.newFunctionWithName("vertexShader")
-        pipelineDescriptor.fragmentFunction = library.newFunctionWithName(fragmentFunction)
+        pipelineDescriptor.fragmentFunction = library.newFunctionWithName("fragmentShader")
         
         
         let vertexDescriptor:MTLVertexDescriptor = MTLVertexDescriptor()

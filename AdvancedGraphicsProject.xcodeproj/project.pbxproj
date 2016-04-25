@@ -43,13 +43,6 @@
 			remoteGlobalIDString = A20AB2C61CBEDB24008DBB60;
 			remoteInfo = AdvancedGraphicsProject;
 		};
-		A26757CA1CC99898001DC1D1 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = A26757C61CC99898001DC1D1 /* AlphaBlending.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 83DBFC151A3F5C0000630BA1;
-			remoteInfo = AlphaBlending;
-		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
@@ -77,7 +70,6 @@
 		A20AB2E81CBEDB25008DBB60 /* AdvancedGraphicsProjectUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AdvancedGraphicsProjectUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		A20AB2EC1CBEDB25008DBB60 /* AdvancedGraphicsProjectUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvancedGraphicsProjectUITests.swift; sourceTree = "<group>"; };
 		A20AB2EE1CBEDB25008DBB60 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		A26757C61CC99898001DC1D1 /* AlphaBlending.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = AlphaBlending.xcodeproj; path = "../../tests/sample-code/objc/10-AlphaBlending/AlphaBlending.xcodeproj"; sourceTree = "<group>"; };
 		A26757CD1CC9FEB2001DC1D1 /* sand.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = sand.png; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -137,7 +129,6 @@
 		A20AB2BE1CBEDB24008DBB60 = {
 			isa = PBXGroup;
 			children = (
-				A26757C61CC99898001DC1D1 /* AlphaBlending.xcodeproj */,
 				A20AB2C91CBEDB24008DBB60 /* AdvancedGraphicsProject */,
 				A20AB2E01CBEDB25008DBB60 /* AdvancedGraphicsProjectTests */,
 				A20AB2EB1CBEDB25008DBB60 /* AdvancedGraphicsProjectUITests */,
@@ -192,14 +183,6 @@
 				A20AB2EE1CBEDB25008DBB60 /* Info.plist */,
 			);
 			path = AdvancedGraphicsProjectUITests;
-			sourceTree = "<group>";
-		};
-		A26757C71CC99898001DC1D1 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				A26757CB1CC99898001DC1D1 /* AlphaBlending.app */,
-			);
-			name = Products;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -295,12 +278,6 @@
 			mainGroup = A20AB2BE1CBEDB24008DBB60;
 			productRefGroup = A20AB2C81CBEDB24008DBB60 /* Products */;
 			projectDirPath = "";
-			projectReferences = (
-				{
-					ProductGroup = A26757C71CC99898001DC1D1 /* Products */;
-					ProjectRef = A26757C61CC99898001DC1D1 /* AlphaBlending.xcodeproj */;
-				},
-			);
 			projectRoot = "";
 			targets = (
 				A20AB2C61CBEDB24008DBB60 /* AdvancedGraphicsProject */,
@@ -309,16 +286,6 @@
 			);
 		};
 /* End PBXProject section */
-
-/* Begin PBXReferenceProxy section */
-		A26757CB1CC99898001DC1D1 /* AlphaBlending.app */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.application;
-			path = AlphaBlending.app;
-			remoteRef = A26757CA1CC99898001DC1D1 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-/* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
 		A20AB2C51CBEDB24008DBB60 /* Resources */ = {
