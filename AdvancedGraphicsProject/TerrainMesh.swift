@@ -36,6 +36,8 @@ class TerrainMesh:Mesh {
         self.indexCount = 0
         self.stride = 0
         super.init()
+        self.name = "Terrain Mesh"
+
         
         self.generateTerrain()
     }
@@ -55,8 +57,10 @@ class TerrainMesh:Mesh {
         if let vB = self.vertexBuffer {
             let corners = [0, (self.stride), ((self.stride-1) * self.stride), ((self.stride * self.stride) - 1)]
             for offset in corners {
-                var vertex = UnsafeMutablePointer<Vertex>(vB.contents() + offset).memory
-                vertex.position.y = 0.0
+                let vertexPointer = UnsafeMutablePointer<Vertex>(vB.contents()).advancedBy(offset)
+                var vertexData = vertexPointer.memory
+                vertexData.position.y = 0.0
+                vertexPointer.memory = vertexData
             }
         }
         
@@ -77,6 +81,8 @@ class TerrainMesh:Mesh {
         }
         
         self.computeMeshCoords()
+        self.computeMeshNormals()
+        self.generateIndices()
         
         self.vertexBuffer.label = "Vertices (Terrain)"
         self.indexBuffer.label = "Vertices (Terrain)"
@@ -95,8 +101,7 @@ class TerrainMesh:Mesh {
             let offsets = [(r0 * self.stride + c0), (r0 * self.stride + c1) + (r1 * self.stride + c1), (r1 * self.stride + c0)]
             
             for offset in offsets {
-                let adjOffset:Int = sizeof(Vertex) * offset
-                var vertex = UnsafeMutablePointer<Vertex>(vB.contents() + adjOffset).memory
+                var vertex = UnsafeMutablePointer<Vertex>(vB.contents()).advancedBy(offset).memory
                 corners.append(vertex.position.y)
             }
             
@@ -104,8 +109,10 @@ class TerrainMesh:Mesh {
             let error = (Float(((Double((arc4random() / UInt32.max))) - 0.5) * 2)) * variance
             let y:Float = yMean + error
             
-            var vertex = UnsafeMutablePointer<Vertex>(vB.contents() + (rmid * self.stride + cmid)).memory
-            vertex.position.y = y
+            let vertexPointer = UnsafeMutablePointer<Vertex>(vB.contents()).advancedBy(rmid * self.stride + cmid)
+            var vertexData = vertexPointer.memory
+            vertexData.position.y = y
+            vertexPointer.memory = vertexData
         }
     }
     
@@ -123,27 +130,34 @@ class TerrainMesh:Mesh {
             let offsets = [(r0 * self.stride + c0), (r0 * self.stride + c1), (r1 * self.stride + c1), (r1 * self.stride + c0)]
             
             for offset in offsets {
-                let adjOffset = sizeof(Vertex) * offset
-                var vertex = UnsafeMutablePointer<Vertex>(vB.contents() + adjOffset).memory
+                var vertex = UnsafeMutablePointer<Vertex>(vB.contents()).advancedBy(offset).memory
                 corners.append(vertex.position.y)
             }
             
             var error:Float = 0
             error = (Float(((Double((arc4random() / UInt32.max))) - 0.5) * 2)) * variance
-            var vertex = UnsafeMutablePointer<Vertex>(vB.contents() + (sizeof(Vertex) * (r0 * self.stride + cmid))).memory
-            vertex.position.y = (corners[0] + corners[1]) * 0.5 + error
+            var vertexPointer = UnsafeMutablePointer<Vertex>(vB.contents()).advancedBy((r0 * self.stride + cmid))
+            var vertexData = vertexPointer.memory
+            vertexData.position.y = (corners[0] + corners[1]) * 0.5 + error
+            vertexPointer.memory = vertexData
             
             error = (Float(((Double((arc4random() / UInt32.max))) - 0.5) * 2)) * variance
-            vertex = UnsafeMutablePointer<Vertex>(vB.contents() + (sizeof(Vertex) * (rmid * self.stride + c0))).memory
-            vertex.position.y = (corners[0] + corners[3]) * 0.5 + error
+            vertexPointer = UnsafeMutablePointer<Vertex>(vB.contents()).advancedBy((rmid * self.stride + c0))
+            vertexData = vertexPointer.memory
+            vertexData.position.y = (corners[0] + corners[3]) * 0.5 + error
+            vertexPointer.memory = vertexData
             
             error = (Float(((Double((arc4random() / UInt32.max))) - 0.5) * 2)) * variance
-            vertex = UnsafeMutablePointer<Vertex>(vB.contents() + (sizeof(Vertex) * (rmid * self.stride + c1))).memory
-            vertex.position.y = (corners[1] + corners[2]) * 0.5 + error
+            vertexPointer = UnsafeMutablePointer<Vertex>(vB.contents()).advancedBy((rmid * self.stride + c1))
+            vertexData = vertexPointer.memory
+            vertexData.position.y = (corners[1] + corners[2]) * 0.5 + error
+            vertexPointer.memory = vertexData
             
             error = (Float(((Double((arc4random() / UInt32.max))) - 0.5) * 2)) * variance
-            vertex = UnsafeMutablePointer<Vertex>(vB.contents() + (sizeof(Vertex) * (r1 * self.stride + cmid))).memory
-            vertex.position.y = (corners[1] + corners[2]) * 0.5 + error
+            vertexPointer = UnsafeMutablePointer<Vertex>(vB.contents()).advancedBy((r1 * self.stride + cmid))
+            vertexData = vertexPointer.memory
+            vertexData.position.y = (corners[1] + corners[2]) * 0.5 + error
+            vertexPointer.memory = vertexData
         }
     }
     
@@ -151,17 +165,19 @@ class TerrainMesh:Mesh {
         for row in 0 ..< self.stride {
             for column in 0 ..< self.stride {
                 if let vB = self.vertexBuffer {
-                    let offset:size_t = (sizeof(Vertex) * (row * self.stride + column))
-                    var vertex = UnsafeMutablePointer<Vertex>(vB.contents() + offset).memory
+                    let offset:size_t = (row * self.stride + column)
+                    let vertexPointer = UnsafeMutablePointer<Vertex>(vB.contents()).advancedBy(offset)
+                    var vertexData = vertexPointer.memory
                     let x:Float = (Float(column) / Float((self.stride - 1)) - 0.5) * self.width
-                    let y = vertex.position.y * self.height
+                    let y = vertexData.position.y * self.height
                     let z:Float = (Float(row) / Float((self.stride - 1)) - 0.5) * self.depth
-                    vertex.position = vector_float4(x, y, z, 1)
+                    vertexData.position = vector_float4(x, y, z, 1)
                     
                     let s:Float = (Float(column) / Float((self.stride - 1))) * texScale
                     let t:Float = (Float(row) / Float((self.stride - 1))) * texScale
-                    vertex.texCoords = vector_float2(s, t)
-                    vertex.diffuseColor = colorWhite
+                    vertexData.texCoords = vector_float2(s, t)
+                    vertexData.diffuseColor = colorWhite
+                    vertexPointer.memory = vertexData
                 }
             }
         }
@@ -173,21 +189,25 @@ class TerrainMesh:Mesh {
             for column in 0 ..< self.stride {
                 if let vB = self.vertexBuffer {
                     if row > 0 && column > 0 && row < (self.stride - 1) && column < (self.stride - 1) {
-                        var offset:size_t = (sizeof(Vertex) * (row * self.stride + (column - 1)))
-                        var vertex = UnsafeMutablePointer<Vertex>(vB.contents() + offset).memory
-                        let L:vector_float4 = vertex.position
+                        var offset:size_t = (row * self.stride + (column - 1))
+                        var vertexPointer = UnsafeMutablePointer<Vertex>(vB.contents()).advancedBy(offset)
+                        var vertexData = vertexPointer.memory
+                        let L:vector_float4 = vertexData.position
                         
-                        offset = (sizeof(Vertex) * (row * self.stride + (column + 1)))
-                        vertex = UnsafeMutablePointer<Vertex>(vB.contents() + offset).memory
-                        let R:vector_float4 = vertex.position
+                        offset = (row * self.stride + (column + 1))
+                        vertexPointer = UnsafeMutablePointer<Vertex>(vB.contents()).advancedBy(offset)
+                        vertexData = vertexPointer.memory
+                        let R:vector_float4 = vertexData.position
                         
-                        offset = (sizeof(Vertex) * ((row - 1) * self.stride + column))
-                        vertex = UnsafeMutablePointer<Vertex>(vB.contents() + offset).memory
-                        let U:vector_float4 = vertex.position
+                        offset = (row - 1) * self.stride + column
+                        vertexPointer = UnsafeMutablePointer<Vertex>(vB.contents()).advancedBy(offset)
+                        vertexData = vertexPointer.memory
+                        let U:vector_float4 = vertexData.position
                         
-                        offset = (sizeof(Vertex) * ((row + 1) * self.stride + column))
-                        vertex = UnsafeMutablePointer<Vertex>(vB.contents() + offset).memory
-                        let D:vector_float4 = vertex.position
+                        offset = (row + 1) * self.stride + column
+                        vertexPointer = UnsafeMutablePointer<Vertex>(vB.contents()).advancedBy(offset)
+                        vertexData = vertexPointer.memory
+                        let D:vector_float4 = vertexData.position
                         
                         let T:vector_float3 = vector_float3((R.x - L.x), (R.y - L.y) * yScale, 0)
                         let B:vector_float3 = vector_float3(0, (D.y - U.y) * yScale, D.z - U.z)
@@ -195,14 +215,18 @@ class TerrainMesh:Mesh {
                         var normal:vector_float4 = vector_float4(N.x, N.y, N.z, 0)
                         normal = vector_normalize(normal)
                         
-                        offset = (sizeof(Vertex) * (row * self.stride + column))
-                        vertex = UnsafeMutablePointer<Vertex>(vB.contents() + offset).memory
-                        vertex.normal = normal
+                        offset = row * self.stride + column
+                        vertexPointer = UnsafeMutablePointer<Vertex>(vB.contents()).advancedBy(offset)
+                        vertexData = vertexPointer.memory
+                        vertexData.normal = normal
+                        vertexPointer.memory = vertexData
                     } else {
-                        let offset:size_t = (sizeof(Vertex) * (row * self.stride + column))
-                        var vertex = UnsafeMutablePointer<Vertex>(vB.contents() + offset).memory
+                        let offset:size_t = (row * self.stride + column)
+                        let vertexPointer = UnsafeMutablePointer<Vertex>(vB.contents()).advancedBy(offset)
+                        var vertexData = vertexPointer.memory
                         let N:vector_float4 = vector_float4(0, 1, 0, 0)
-                        vertex.normal = N
+                        vertexData.normal = N
+                        vertexPointer.memory = vertexData
                     }
                 }
             }
@@ -211,29 +235,18 @@ class TerrainMesh:Mesh {
     
     func generateIndices() {
         if let iB = self.indexBuffer {
-            var index:Int = 1
+            var index:Int = 0
             for row in 0 ..< (self.stride - 1) {
                 for column in 0 ..< (self.stride - 1) {
-                    var indexMemory = setIndexValue(iB, index: index); index += 1
-                    indexMemory.memory = UInt16(row * self.stride + column)
-                    indexMemory = setIndexValue(iB, index: index); index += 1
-                    indexMemory.memory = UInt16((row + 1) * self.stride + column)
-                    indexMemory = setIndexValue(iB, index: index); index += 1
-                    indexMemory.memory = UInt16((row + 1) * self.stride + (column + 1))
-                    indexMemory = setIndexValue(iB, index: index); index += 1
-                    indexMemory.memory = UInt16((row + 1) * self.stride + (column + 1))
-                    indexMemory = setIndexValue(iB, index: index); index += 1
-                    indexMemory.memory = UInt16((row + 1) * self.stride + column)
-                    indexMemory = setIndexValue(iB, index: index); index += 1
-                    indexMemory.memory = UInt16(row * self.stride + column)
+                    UnsafeMutablePointer<Index>(iB.contents()).advancedBy(index).memory = UInt16(row * self.stride + column); index += 1
+                    UnsafeMutablePointer<Index>(iB.contents()).advancedBy(index).memory = UInt16((row + 1) * self.stride + column); index += 1
+                    UnsafeMutablePointer<Index>(iB.contents()).advancedBy(index).memory = UInt16((row + 1) * self.stride + (column + 1)); index += 1
+                    UnsafeMutablePointer<Index>(iB.contents()).advancedBy(index).memory = UInt16((row + 1) * self.stride + (column + 1)); index += 1
+                    UnsafeMutablePointer<Index>(iB.contents()).advancedBy(index).memory = UInt16(row * self.stride + (column + 1)); index += 1
+                    UnsafeMutablePointer<Index>(iB.contents()).advancedBy(index).memory = UInt16(row * self.stride + column); index += 1
                 }
             }
         }
-    }
-    
-    func setIndexValue(buffer:MTLBuffer, index:Int) -> UnsafeMutablePointer<Index> {
-        let offset:Int = sizeof(Index) * index
-        return UnsafeMutablePointer<Index>(buffer.contents() + offset)
     }
     
     func heightAtPositionX(x:Float, z:Float) -> Float {
@@ -256,20 +269,20 @@ class TerrainMesh:Mesh {
         let dz:Float = fz - Float(iz)
         
         if let vB = self.vertexBuffer {
-            var offset:Int = sizeof(Vertex) * (iz * self.stride + ix)
-            var vertex = UnsafeMutablePointer<Vertex>(vB.contents() + offset).memory
+            var offset:Int = (iz * self.stride + ix)
+            var vertex = UnsafeMutablePointer<Vertex>(vB.contents()).advancedBy(offset).memory
             let y00:Float = vertex.position.y
             
-            offset = sizeof(Vertex) * (iz * self.stride + (ix + 1))
-            vertex = UnsafeMutablePointer<Vertex>(vB.contents() + offset).memory
+            offset = (iz * self.stride + (ix + 1))
+            vertex = UnsafeMutablePointer<Vertex>(vB.contents()).advancedBy(offset).memory
             let y01:Float = vertex.position.y
             
-            offset = (sizeof(Vertex) * ((iz + 1) * self.stride + ix))
-            vertex = UnsafeMutablePointer<Vertex>(vB.contents() + offset).memory
+            offset = (iz + 1) * self.stride + ix
+            vertex = UnsafeMutablePointer<Vertex>(vB.contents()).advancedBy(offset).memory
             let y10:Float = vertex.position.y
             
-            offset = (sizeof(Vertex) * ((iz + 1) * self.stride + (ix + 1)))
-            vertex = UnsafeMutablePointer<Vertex>(vB.contents() + offset).memory
+            offset = (iz + 1) * self.stride + (ix + 1)
+            vertex = UnsafeMutablePointer<Vertex>(vB.contents()).advancedBy(offset).memory
             let y11:Float = vertex.position.y
             
             let yTop:Float = ((1 - dx) * y00) + (dx * y01)

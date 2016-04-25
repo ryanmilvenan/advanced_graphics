@@ -113,18 +113,22 @@ class Renderer {
     }
     
     func populateTerrainUniforms() {
-        let terrainModelMatrix:matrix_float4x4 = matrix_identity()
+        let terrainModelMatrix:float4x4 = matrix_identity()
         
-        let terrainNormalMatrix = matrix_transpose(matrix_invert(matrix_extract_linear(terrainModelMatrix)))
+        //let terrainNormalMatrix = matrix_transpose(matrix_invert(matrix_extract_linear(terrainModelMatrix)))
+        let terrainNormalMatrix = matrix_extract_linear(terrainModelMatrix).transpose.inverse
         var terrainUniforms:InstanceUniforms = InstanceUniforms(modelMatrix: terrainModelMatrix, normalMatrix: terrainNormalMatrix)
+        print("Terrain Uniform offset \(self.uniformBuffer.contents() + terrainUniformOffset)")
         memcpy(self.uniformBuffer.contents() + terrainUniformOffset, &terrainUniforms, sizeof(InstanceUniforms))
     }
     
     func populateWaterUniforms() {
-        let waterOffsetVec:vector_float3 = vector_float3(0, waterLevel, 0)
+        let waterOffsetVec:float3 = float3(0, waterLevel, 0)
         let waterModelMatrix = matrix_translation(waterOffsetVec)
-        let waterNormalMatrix = matrix_transpose(matrix_invert(matrix_extract_linear(waterModelMatrix)))
+        let waterNormalMatrix = matrix_extract_linear(waterModelMatrix).transpose.inverse
         var waterUniforms:InstanceUniforms = InstanceUniforms(modelMatrix: waterModelMatrix, normalMatrix: waterNormalMatrix)
+        print("Water Uniforms: \(waterUniforms)")
+
         memcpy(self.uniformBuffer.contents() + waterUniformOffset, &waterUniforms, sizeof(InstanceUniforms))
     }
     
@@ -132,7 +136,6 @@ class Renderer {
         var newPosition:vector_float3 = position
         let halfWidth:Float = (self.terrainMesh as! TerrainMesh).width * 0.5
         let halfDepth:Float = (self.terrainMesh as! TerrainMesh).depth * 0.5
-        var newPosArray = [Float]()
         
         if(newPosition.x < -halfWidth) {
             newPosition.x = -halfWidth
@@ -147,11 +150,6 @@ class Renderer {
         }
         
         newPosition.y = (self.terrainMesh as! TerrainMesh).heightAtPositionX(newPosition.x, z: newPosition.z)
-        newPosArray.append(newPosition.x)
-        newPosArray.append(newPosition.y)
-        newPosArray.append(newPosition.z)
-        
-        
         
         if(newPosition.y < waterLevel) {
             newPosition.y  = waterLevel
@@ -167,17 +165,16 @@ class Renderer {
         camPosition.x += -sin(self.cameraHeading) * self.velocity * self.frameDuration
         camPosition.z += -cos(self.cameraHeading) * self.velocity * self.frameDuration
         camPosition = self.constrainToTerrain(camPosition)
-        print (camPosition.y)
         camPosition.y += cameraHeight
         
         self.cameraPosition = camPosition
         
-        let Y:vector_float3 = vector_float3( 0, 1, 0)
-        let viewMatrix:matrix_float4x4 = matrix_multiply(matrix_rotation(Y, angle: self.cameraHeading), matrix_translation(-self.cameraPosition))
+        let Y:vector_float3 = vector_float3(0, 1, 0)
+        let viewMatrix:float4x4 = matrix_rotation(Y, angle: self.cameraHeading) * matrix_translation(-self.cameraPosition)
         let aspect:Float = Float(self.layer.drawableSize.width) / Float(self.layer.drawableSize.height)
         let fov:Float = (aspect > 1) ? Float(M_PI / 4) : Float(M_PI / 3)
-        let projectionMatrix:matrix_float4x4 = matrix_perspective_projection(aspect, fovy: fov, near: 0.1, far: 100)
-        let viewProjectionMatrix = matrix_multiply(projectionMatrix, viewMatrix)
+        let projectionMatrix:float4x4 = matrix_perspective_projection(aspect, fovy: fov, near: 0.1, far: 100)
+        let viewProjectionMatrix = projectionMatrix * viewMatrix
         var uniforms:Uniforms = Uniforms(viewProjection: viewProjectionMatrix)
         memcpy(self.uniformBuffer.contents() + sharedUniformOffset, &uniforms, sizeof(Uniforms))
     }
@@ -187,7 +184,6 @@ class Renderer {
         let descriptor:MTLTextureDescriptor = MTLTextureDescriptor.texture2DDescriptorWithPixelFormat(MTLPixelFormat.Depth32Float, width: Int(drawableSize.width), height: Int(drawableSize.height), mipmapped: false)
         self.depthTexture = self.device.newTextureWithDescriptor(descriptor)
         self.depthTexture.label = "Depth Texture"
-        
     }
     
     func newRenderPassDescriptorWithColorAttachmentTexture(texture:MTLTexture) -> MTLRenderPassDescriptor {
@@ -206,6 +202,7 @@ class Renderer {
     }
     
     func drawInstancedMesh(mesh:Mesh, encoder:MTLRenderCommandEncoder, material:Material, instanceCount:Int) {
+        //mesh.checkBuffers(mesh.vertexBuffer.length/(sizeof(Vertex)), indexCount: mesh.indexBuffer.length/sizeof(Index))
         encoder.setRenderPipelineState(material.pipelineState)
         encoder.setDepthStencilState(material.depthState)
         encoder.setFragmentSamplerState(self.sampler, atIndex: 0)

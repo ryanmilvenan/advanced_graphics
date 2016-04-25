@@ -12,6 +12,7 @@ import simd
 class PlaneMesh: Mesh {
     init(width:Float, depth:Float, divX:Int, divZ:Int, texScale:Float, opacity:Float, device:MTLDevice) {
         super.init()
+        self.name = "Plane Mesh"
         self.generateBuffers(width, depth: depth, divX: divX, divZ: divZ, texScale: texScale, opacity: opacity, device: device)
     }
     
@@ -31,21 +32,20 @@ class PlaneMesh: Mesh {
             var z:Float = depth * -0.5
             
             var current:Int = 0
-            for _ in 0...divZ {
+            for _ in 0 ..< (divZ) {
                 
                 var x:Float = width * -0.5
-                
-                for _ in 0...divX  {
-                    let offset:Int = sizeof(Vertex)*current
-                    var vertex = UnsafeMutablePointer<Vertex>(vB.contents() + offset).memory
-                    vertex.position = vector_float4(x, y, z, 1)
-                    vertex.normal = vector_float4(0, 1, 0, 0)
+                for _ in 0 ..< (divX)  {
+                    let vertexPointer = UnsafeMutablePointer<Vertex>(vB.contents()).advancedBy(current)
+                    var vertexData = vertexPointer.memory
+                    vertexData.position = vector_float4(x, y, z, 1)
+                    vertexData.normal = vector_float4(0, 1, 0, 0)
                     
                     let s:Float = ((x / width) + 0.5) * texScale
                     let t:Float = ((z / depth) + 0.5) * texScale
-                    vertex.texCoords = vector_float2(s, t)
-                    
-                    vertex.diffuseColor = vector_float4(1, 1, 1, opacity)
+                    vertexData.texCoords = vector_float2(s, t)
+                    vertexData.diffuseColor = vector_float4(1, 1, 1, opacity)
+                    vertexPointer.memory = vertexData
                     
                     x += dx
                     current += 1
@@ -55,29 +55,20 @@ class PlaneMesh: Mesh {
         }
         
         if let iB = self.indexBuffer {
-            var index:Int = 1
+            var index:Int = 0
             for currentZ in 0 ..< divZ {
                 for currentX in 0 ..< divX {
                     let v:Int = (currentX * divX) + currentZ
-                    var indexMemory = setIndexValue(iB, index: index); index += 1
-                    indexMemory.memory = UInt16(v)
-                    indexMemory = setIndexValue(iB, index: index); index += 1
-                    indexMemory.memory = UInt16(v + divX)
-                    indexMemory = setIndexValue(iB, index: index); index += 1
-                    indexMemory.memory = UInt16(v + divX + 1)
-                    indexMemory = setIndexValue(iB, index: index); index += 1
-                    indexMemory.memory = UInt16(v + divX + 1)
-                    indexMemory = setIndexValue(iB, index: index); index += 1
-                    indexMemory.memory = UInt16(v + 1)
-                    indexMemory = setIndexValue(iB, index: index); index += 1
-                    indexMemory.memory = UInt16(v)
+                    UnsafeMutablePointer<Index>(iB.contents()).advancedBy(index).memory = UInt16(v); index += 1
+                    UnsafeMutablePointer<Index>(iB.contents()).advancedBy(index).memory = UInt16(v + divX); index += 1
+                    UnsafeMutablePointer<Index>(iB.contents()).advancedBy(index).memory = UInt16(v + divX + 1); index += 1
+                    UnsafeMutablePointer<Index>(iB.contents()).advancedBy(index).memory = UInt16(v + divX + 1); index += 1
+                    UnsafeMutablePointer<Index>(iB.contents()).advancedBy(index).memory = UInt16(v + 1); index += 1
+                    UnsafeMutablePointer<Index>(iB.contents()).advancedBy(index).memory = UInt16(v); index += 1
                 }
             }
         }
     }
     
-    func setIndexValue(buffer:MTLBuffer, index:Int) -> UnsafeMutablePointer<Index> {
-        let offset:Int = sizeof(Index) * index
-        return UnsafeMutablePointer<Index>(buffer.contents() + offset)
-    }
+    
 }
