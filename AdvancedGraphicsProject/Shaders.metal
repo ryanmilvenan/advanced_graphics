@@ -69,8 +69,7 @@ fragment half4 fragmentShader(ProjectedVertex vert [[stage_in]],
     float diffuseIntensity = max(kMinDiffuseIntensity, dot(normalize(vert.normal.xyz), -kLightDirection));
     float4 color = diffuseIntensity * textureColor * vertexColor;
     
-    //return half4(color.r, color.g, color.b, vertexColor.a);
-    return half4(1.0, 1.0, 0.0, 1.0);
+    return half4(color.r, color.g, color.b, vertexColor.a);
 }
 
 fragment half4 fragment_alpha_test(ProjectedVertex vert [[stage_in]],

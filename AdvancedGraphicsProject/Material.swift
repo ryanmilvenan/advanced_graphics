@@ -34,17 +34,17 @@ class Material {
         
         //Normal
         vertexDescriptor.attributes[1].format = MTLVertexFormat.Float4
-        vertexDescriptor.attributes[1].offset = strideof(vector_float4)
+        vertexDescriptor.attributes[1].offset = 16
         vertexDescriptor.attributes[1].bufferIndex = 0
         
         //Color
         vertexDescriptor.attributes[2].format = MTLVertexFormat.Float4
-        vertexDescriptor.attributes[2].offset = strideof(vector_float4) * 2
+        vertexDescriptor.attributes[2].offset = 32
         vertexDescriptor.attributes[2].bufferIndex = 0
         
         //Tex Coord
         vertexDescriptor.attributes[3].format = MTLVertexFormat.Float2
-        vertexDescriptor.attributes[3].offset = strideof(vector_float4) * 3
+        vertexDescriptor.attributes[3].offset = 48
         vertexDescriptor.attributes[3].bufferIndex = 0
         
         vertexDescriptor.layouts[0].stepFunction = MTLVertexStepFunction.PerVertex
