@@ -14,7 +14,7 @@
 		40437D8B1CC8947700B8685F /* MetalViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40437D8A1CC8947700B8685F /* MetalViewController.swift */; };
 		40437D8D1CC897DE00B8685F /* Mesh.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40437D8C1CC897DE00B8685F /* Mesh.swift */; };
 		40437D8F1CC8987A00B8685F /* TerrainMesh.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40437D8E1CC8987A00B8685F /* TerrainMesh.swift */; };
-		40437D911CC8988900B8685F /* PlaneMesh.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40437D901CC8988900B8685F /* PlaneMesh.swift */; };
+		40437D911CC8988900B8685F /* WaterMesh.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40437D901CC8988900B8685F /* WaterMesh.swift */; };
 		40437D931CC8AB1900B8685F /* TextureLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40437D921CC8AB1900B8685F /* TextureLoader.swift */; };
 		40437D951CC8B76400B8685F /* Material.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40437D941CC8B76400B8685F /* Material.swift */; };
 		40437D971CC8BDBE00B8685F /* Math.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40437D961CC8BDBE00B8685F /* Math.swift */; };
@@ -53,7 +53,7 @@
 		40437D8A1CC8947700B8685F /* MetalViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MetalViewController.swift; sourceTree = "<group>"; };
 		40437D8C1CC897DE00B8685F /* Mesh.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Mesh.swift; sourceTree = "<group>"; };
 		40437D8E1CC8987A00B8685F /* TerrainMesh.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TerrainMesh.swift; sourceTree = "<group>"; };
-		40437D901CC8988900B8685F /* PlaneMesh.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlaneMesh.swift; sourceTree = "<group>"; };
+		40437D901CC8988900B8685F /* WaterMesh.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WaterMesh.swift; sourceTree = "<group>"; };
 		40437D921CC8AB1900B8685F /* TextureLoader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextureLoader.swift; sourceTree = "<group>"; };
 		40437D941CC8B76400B8685F /* Material.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Material.swift; sourceTree = "<group>"; };
 		40437D961CC8BDBE00B8685F /* Math.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Math.swift; sourceTree = "<group>"; };
@@ -151,7 +151,7 @@
 			children = (
 				40437D8C1CC897DE00B8685F /* Mesh.swift */,
 				40437D8E1CC8987A00B8685F /* TerrainMesh.swift */,
-				40437D901CC8988900B8685F /* PlaneMesh.swift */,
+				40437D901CC8988900B8685F /* WaterMesh.swift */,
 				40437D841CC8759500B8685F /* Renderer.swift */,
 				40437D9B1CC8DAC200B8685F /* Utilities */,
 				40437D941CC8B76400B8685F /* Material.swift */,
@@ -331,7 +331,7 @@
 				40437D8D1CC897DE00B8685F /* Mesh.swift in Sources */,
 				40437D871CC8763500B8685F /* ShaderTypes.swift in Sources */,
 				A20AB2CB1CBEDB24008DBB60 /* AppDelegate.swift in Sources */,
-				40437D911CC8988900B8685F /* PlaneMesh.swift in Sources */,
+				40437D911CC8988900B8685F /* WaterMesh.swift in Sources */,
 				40437D8B1CC8947700B8685F /* MetalViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

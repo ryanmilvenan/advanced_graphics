@@ -6,7 +6,6 @@
 //  Copyright © 2016 Ryan Milvenan. All rights reserved.
 //
 
-import Foundation
 import simd
 
 typealias Index = UInt16

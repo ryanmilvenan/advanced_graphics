@@ -65,12 +65,10 @@ func projectionMatrix(near: Float, far: Float, aspect: Float, fovy: Float) ->flo
     return float4x4([X, Y, Z, W])
 }
 
-func matrix_extract_linear(matrix:float4x4) -> float4x4 {
-    let row1 = float4(matrix.cmatrix.columns.0.x, matrix.cmatrix.columns.1.x, matrix.cmatrix.columns.2.x, 0)
-    let row2 = float4(matrix.cmatrix.columns.0.y, matrix.cmatrix.columns.1.y, matrix.cmatrix.columns.2.y, 0)
-    let row3 = float4(matrix.cmatrix.columns.0.z, matrix.cmatrix.columns.1.z, matrix.cmatrix.columns.2.z, 0)
-    let row4 = float4(0, 0, 0, 1)
-    
-    let m:float4x4 = float4x4([row1, row2, row3, row4])
-    return m
+func percent(start:Float, end:Float) -> Float {
+    return start / end
+}
+
+func lerp( percent: Float, start: Float, end: Float ) -> Float {
+    return start + ( percent * ( end - start ) )
 }

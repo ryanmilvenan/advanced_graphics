@@ -71,9 +71,7 @@ class Renderer {
             print("Metal is not supported on this device")
             return
         }
-    
-        //self.layer.pixelFormat = MTLPixelFormat.BGRA8Unorm
-        
+            
         self.commandQueue = self.device.newCommandQueue()
         
         let samplerDescriptor:MTLSamplerDescriptor = MTLSamplerDescriptor()
@@ -104,7 +102,7 @@ class Renderer {
     func loadMeshes() {
         self.terrainMesh = TerrainMesh(width:terrainSize, height: terrainHeight, iterations: 6, smoothness: terrainSmoothness, device: self.device)
         
-        self.waterMesh = PlaneMesh(width: terrainSize, depth: terrainSize, divX: 32, divZ: 32, texScale: 10, opacity: 0.2, device: self.device)
+        self.waterMesh = WaterMesh(width: terrainSize, depth: terrainSize, divX: 32, divZ: 32, texScale: 10, opacity: 0.2, device: self.device)
     }
     
     func loadTextures() {
@@ -125,9 +123,7 @@ class Renderer {
     
     func populateTerrainUniforms() {
         let terrainModelMatrix:float4x4 = matrix_identity()
-        
-        //let terrainNormalMatrix = matrix_transpose(matrix_invert(matrix_extract_linear(terrainModelMatrix)))
-        let terrainNormalMatrix = matrix_extract_linear(terrainModelMatrix).transpose.inverse
+        let terrainNormalMatrix = terrainModelMatrix.transpose.inverse
         var terrainUniforms:InstanceUniforms = InstanceUniforms(modelMatrix: terrainModelMatrix, normalMatrix: terrainNormalMatrix)
         memcpy(self.uniformBuffer.contents() + terrainUniformOffset, &terrainUniforms, sizeof(InstanceUniforms))
     }
@@ -135,14 +131,14 @@ class Renderer {
     func populateWaterUniforms() {
         let waterOffsetVec:float3 = float3(0, waterLevel, 0)
         let waterModelMatrix = translationMatrix(waterOffsetVec)
-        let waterNormalMatrix = matrix_extract_linear(waterModelMatrix).transpose.inverse
+        let waterNormalMatrix = waterModelMatrix.transpose.inverse
         var waterUniforms:InstanceUniforms = InstanceUniforms(modelMatrix: waterModelMatrix, normalMatrix: waterNormalMatrix)
 
         memcpy(self.uniformBuffer.contents() + waterUniformOffset, &waterUniforms, sizeof(InstanceUniforms))
     }
     
-    func constrainToTerrain(position:vector_float3) -> vector_float3 {
-        var newPosition:vector_float3 = position
+    func constrainToTerrain(position:float3) -> float3 {
+        var newPosition:float3 = position
         let halfWidth:Float = (self.terrainMesh as! TerrainMesh).width * 0.5
         let halfDepth:Float = (self.terrainMesh as! TerrainMesh).depth * 0.5
         
@@ -168,7 +164,7 @@ class Renderer {
     }
     
     func updateCamera() {
-        var camPosition:vector_float3 = self.cameraPosition
+        var camPosition:float3 = self.cameraPosition
         
         self.cameraHeading += self.angularVelocity * self.frameDuration
         camPosition.x += -sin(self.cameraHeading) * self.velocity * self.frameDuration
@@ -177,7 +173,7 @@ class Renderer {
         camPosition.y += cameraHeight
         
         self.cameraPosition = camPosition
-        print("Cam Position: \(self.cameraPosition)")
+        //print("Cam Position: \(self.cameraPosition)")
         self.reshape()
         
         let viewProjectionMatrix = projMatrix * viewMatrix
@@ -192,23 +188,7 @@ class Renderer {
         self.depthTexture.label = "Depth Texture"
     }
     
-    func newRenderPassDescriptorWithColorAttachmentTexture(texture:MTLTexture) -> MTLRenderPassDescriptor {
-        let renderPassDescriptor:MTLRenderPassDescriptor = MTLRenderPassDescriptor()
-        renderPassDescriptor.colorAttachments[0].texture = texture
-        renderPassDescriptor.colorAttachments[0].loadAction = .Clear
-        renderPassDescriptor.colorAttachments[0].storeAction = .Store
-        renderPassDescriptor.colorAttachments[0].clearColor = MTLClearColorMake(0.2, 0.5, 0.95, 1.0)
-        
-        renderPassDescriptor.depthAttachment.texture = self.depthTexture
-        renderPassDescriptor.depthAttachment.loadAction = .Clear
-        renderPassDescriptor.depthAttachment.storeAction = .Store
-        renderPassDescriptor.depthAttachment.clearDepth = 1.0
-        
-        return renderPassDescriptor
-    }
-    
     func drawInstancedMesh(mesh:Mesh, encoder:MTLRenderCommandEncoder, material:Material, instanceCount:Int) {
-        //mesh.checkBuffers(mesh.vertexBuffer.length/(sizeof(Vertex)), indexCount: mesh.indexBuffer.length/sizeof(Index))
         encoder.setRenderPipelineState(material.pipelineState)
         encoder.setDepthStencilState(material.depthState)
         encoder.setFragmentSamplerState(self.sampler, atIndex: 0)
@@ -259,20 +239,20 @@ class Renderer {
             }
             
             renderPassDescriptor.colorAttachments[0].texture = drawable.texture
-            renderPassDescriptor.colorAttachments[0].loadAction = MTLLoadAction.Clear
-            renderPassDescriptor.colorAttachments[0].storeAction = MTLStoreAction.Store
+            renderPassDescriptor.colorAttachments[0].loadAction = .Clear
+            renderPassDescriptor.colorAttachments[0].storeAction = .Store
             renderPassDescriptor.colorAttachments[0].clearColor = MTLClearColorMake(0.2, 0.5, 0.95, 1.0)
             
             renderPassDescriptor.depthAttachment.texture = self.depthTexture
-            renderPassDescriptor.depthAttachment.loadAction = MTLLoadAction.Clear
-            renderPassDescriptor.depthAttachment.storeAction = MTLStoreAction.Store
+            renderPassDescriptor.depthAttachment.loadAction = .Clear
+            renderPassDescriptor.depthAttachment.storeAction = .Store
             renderPassDescriptor.depthAttachment.clearDepth = 1.0
             
             let commandBuffer:MTLCommandBuffer = self.commandQueue.commandBuffer()
             
             let encoder:MTLRenderCommandEncoder = commandBuffer.renderCommandEncoderWithDescriptor(renderPassDescriptor)
             encoder.setFrontFacingWinding(MTLWinding.CounterClockwise)
-            encoder.setCullMode(MTLCullMode.None)
+            encoder.setCullMode(MTLCullMode.Back)
             
             encoder.setVertexBuffer(self.uniformBuffer, offset: sharedUniformOffset, atIndex: 1)
             

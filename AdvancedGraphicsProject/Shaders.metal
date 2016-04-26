@@ -12,8 +12,6 @@ constant float3 kLightDirection(0.2, -0.96, 0.2);
 
 constant float kMinDiffuseIntensity = 0.5;
 
-constant float kAlphaTestReferenceValue = 0.5;
-
 struct Vertex
 {
     float4 position [[attribute(0)]];

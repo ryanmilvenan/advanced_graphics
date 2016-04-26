@@ -9,7 +9,7 @@
 import Metal
 import simd
 
-class PlaneMesh: Mesh {
+class WaterMesh: Mesh {
     
     var vertices:[Vertex]
     var indices:[Index]
