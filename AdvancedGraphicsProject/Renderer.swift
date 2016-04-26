@@ -107,12 +107,22 @@ class Renderer {
     
     func loadTextures() {
         let textureLoader:TextureLoader = TextureLoader.sharedInstance
-        let terrainTexture:MTLTexture = textureLoader.texture2D("sand", mipmapped:true, device:self.device)
-        self.terrainMaterial = Material(diffuseTexture: terrainTexture, blendEnabled: false, depthWriteEnabled: true, device: self.device)
         
+        let terrainTexture:MTLTexture? = textureLoader.loadTexture("sand", mipmapped: true, device: device)
+        if let terrainTex = terrainTexture {
+            self.terrainMaterial = Material(diffuseTexture: terrainTex, blendEnabled: false, depthWriteEnabled: true, device: self.device)
+        } else {
+            print("Error loading terrain texture")
+        }
         
-        let waterTexture:MTLTexture = textureLoader.texture2D("water", mipmapped:true, device:self.device)
-        self.waterMaterial = Material(diffuseTexture: waterTexture, blendEnabled: true, depthWriteEnabled: false, device: self.device)
+        let waterTexture:MTLTexture? = textureLoader.loadTexture("water", mipmapped:true, device: device)
+        
+        if let waterTex = waterTexture {
+            self.waterMaterial = Material(diffuseTexture: waterTex, blendEnabled: true, depthWriteEnabled: false, device: self.device)
+        } else {
+            print("Error loading water texture")
+        }
+        
     }
     
     func buildUniformBuffer() {
