@@ -23,7 +23,8 @@ let waterLevel:Float = -0.5
 let cameraHeight:Float = 0.3
 
 let sharedUniformOffset:size_t = 0
-let terrainUniformOffset:size_t = sharedUniformOffset + sizeof(Uniforms)
+let skyboxUniformOffset:size_t = sharedUniformOffset + sizeof(Uniforms)
+let terrainUniformOffset:size_t = skyboxUniformOffset + sizeof(InstanceUniforms)
 let waterUniformOffset:size_t = terrainUniformOffset + sizeof(InstanceUniforms)
 
 
@@ -56,6 +57,9 @@ class Renderer {
     
     var terrainMesh:Mesh! = nil
     var terrainMaterial:Material! = nil
+    
+    var skyboxMesh:Mesh! = nil
+    var skyboxTexture:MTLTexture? = nil
 
     init(view:MTKView, delegate:MTKViewDelegate) {
         self.mtkView = view
@@ -95,6 +99,7 @@ class Renderer {
         self.loadMeshes()
         self.loadTextures()
         self.buildUniformBuffer()
+        self.populateSkyboxUniforms()
         self.populateTerrainUniforms()
         self.populateWaterUniforms()
     }
@@ -108,14 +113,17 @@ class Renderer {
     func loadTextures() {
         let textureLoader:TextureLoader = TextureLoader.sharedInstance
         
-        let terrainTexture:MTLTexture? = textureLoader.loadTexture("sand", mipmapped: true, device: device)
+        let skyImages:[String] = ["desertsky_rt", "desertsky_lf","desertsky_up", "desertsky_dn", "desertsky_ft", "desertsky_bk"]
+        self.skyboxTexture = textureLoader.loadCubeTexture(skyImages, device: self.device)
+        
+        let terrainTexture:MTLTexture? = textureLoader.load2DTexture("sand", mipmapped: true, device: self.device)
         if let terrainTex = terrainTexture {
             self.terrainMaterial = Material(diffuseTexture: terrainTex, blendEnabled: false, depthWriteEnabled: true, device: self.device)
         } else {
             print("Error loading terrain texture")
         }
         
-        let waterTexture:MTLTexture? = textureLoader.loadTexture("water", mipmapped:true, device: device)
+        let waterTexture:MTLTexture? = textureLoader.load2DTexture("water", mipmapped:true, device: self.device)
         
         if let waterTex = waterTexture {
             self.waterMaterial = Material(diffuseTexture: waterTex, blendEnabled: true, depthWriteEnabled: false, device: self.device)
@@ -129,6 +137,13 @@ class Renderer {
         let uniformBufferLength = waterUniformOffset + sizeof(InstanceUniforms)
         self.uniformBuffer = self.device.newBufferWithLength(uniformBufferLength, options: MTLResourceOptions.OptionCPUCacheModeDefault)
         self.uniformBuffer.label = "Uniforms"
+    }
+    
+    func populateSkyboxUniforms() {
+        let skyboxModelMatrix:float4x4 = matrix_identity()
+        let skyboxNormalMatrix = skyboxModelMatrix.transpose.inverse
+        var skyboxUniforms:InstanceUniforms = InstanceUniforms(modelMatrix: skyboxModelMatrix, normalMatrix: skyboxNormalMatrix)
+        memcpy(self.uniformBuffer.contents() + skyboxUniformOffset, &skyboxUniforms, sizeof(InstanceUniforms))
     }
     
     func populateTerrainUniforms() {
@@ -207,6 +222,46 @@ class Renderer {
         encoder.drawIndexedPrimitives(MTLPrimitiveType.Triangle, indexCount: mesh.indexBuffer.length / sizeof(Index), indexType: MTLIndexType.UInt16, indexBuffer: mesh.indexBuffer, indexBufferOffset: 0, instanceCount: instanceCount)
     }
     
+    func drawSkybox(encoder:MTLRenderCommandEncoder) {
+        let depthDescriptor:MTLDepthStencilDescriptor = MTLDepthStencilDescriptor()
+        depthDescriptor.depthCompareFunction = MTLCompareFunction.Less
+        depthDescriptor.depthWriteEnabled = false
+        
+        let depthState:MTLDepthStencilState = self.device.newDepthStencilStateWithDescriptor(depthDescriptor)
+        
+        if let pipelineState = (self.skyboxMesh as! Skybox).getPipeline() {
+            encoder.setRenderPipelineState(pipelineState)
+            encoder.setDepthStencilState(depthState)
+            encoder.setVertexBuffer(self.skyboxMesh.vertexBuffer, offset: 0, atIndex: 0)
+            encoder.setVertexBuffer(self.uniformBuffer, offset: sharedUniformOffset, atIndex: 1)
+            encoder.setVertexBuffer(self.uniformBuffer, offset: skyboxUniformOffset, atIndex: 2)
+            encoder.setFragmentBuffer(self.uniformBuffer, offset: sharedUniformOffset, atIndex: 0)
+            encoder.setFragmentTexture(self.skyboxTexture, atIndex: 0)
+            encoder.setFragmentSamplerState(self.sampler, atIndex: 0)
+            
+            encoder.drawIndexedPrimitives(.Triangle, indexCount: self.skyboxMesh.indexBuffer.length / sizeof(Index), indexType: MTLIndexType.UInt16, indexBuffer: self.skyboxMesh.indexBuffer, indexBufferOffset: 0, instanceCount: 1)
+        }
+        
+//        MTLDepthStencilDescriptor *depthDescriptor = [MTLDepthStencilDescriptor new];
+//        depthDescriptor.depthCompareFunction = MTLCompareFunctionLess;
+//        depthDescriptor.depthWriteEnabled = NO;
+//        id <MTLDepthStencilState> depthState = [self.device newDepthStencilStateWithDescriptor:depthDescriptor];
+//        
+//        [commandEncoder setRenderPipelineState:self.skyboxPipeline];
+//        [commandEncoder setDepthStencilState:depthState];
+//        [commandEncoder setVertexBuffer:self.skybox.vertexBuffer offset:0 atIndex:0];
+//        [commandEncoder setVertexBuffer:self.uniformBuffer offset:0 atIndex:1];
+//        [commandEncoder setFragmentBuffer:self.uniformBuffer offset:0 atIndex:0];
+//        [commandEncoder setFragmentTexture:self.cubeTexture atIndex:0];
+//        [commandEncoder setFragmentSamplerState:self.samplerState atIndex:0];
+//        
+//        [commandEncoder drawIndexedPrimitives:MTLPrimitiveTypeTriangle
+//            indexCount:[self.skybox.indexBuffer length] / sizeof(UInt16)
+//            indexType:MTLIndexTypeUInt16
+//            indexBuffer:self.skybox.indexBuffer
+//            indexBufferOffset:0];
+    }
+    
     func updateFrameDuration(duration:Float) {
         self.frameDuration = duration
     }
@@ -263,6 +318,8 @@ class Renderer {
             let encoder:MTLRenderCommandEncoder = commandBuffer.renderCommandEncoderWithDescriptor(renderPassDescriptor)
             encoder.setFrontFacingWinding(MTLWinding.CounterClockwise)
             encoder.setCullMode(MTLCullMode.Back)
+            
+            self.drawSkybox(encoder)
             
             encoder.setVertexBuffer(self.uniformBuffer, offset: sharedUniformOffset, atIndex: 1)
             

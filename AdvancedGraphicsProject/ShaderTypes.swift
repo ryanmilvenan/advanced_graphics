@@ -32,3 +32,8 @@ struct Vertex {
         texCoords = tex
     }
 }
+
+struct SkyVertex {
+    var position:float4
+    var normal:float4
+}

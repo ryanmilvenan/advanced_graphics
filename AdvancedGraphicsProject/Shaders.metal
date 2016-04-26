@@ -28,6 +28,18 @@ struct ProjectedVertex
     float2 texCoords;
 };
 
+struct SkyVertex
+{
+    float4 position [[position]];
+    float4 normal;
+};
+
+struct SkyVertOut
+{
+    float4 position [[position]];
+    float4 texCoords;
+};
+
 struct Uniforms
 {
     float4x4 viewProjectionMatrix;
@@ -68,4 +80,29 @@ fragment half4 fragmentShader(ProjectedVertex vert [[stage_in]],
     float4 color = diffuseIntensity * textureColor * vertexColor;
     
     return half4(color.r, color.g, color.b, vertexColor.a);
+}
+
+vertex SkyVertOut vertex_skybox(device SkyVertex *vertices     [[buffer(0)]],
+                                     constant Uniforms &uniforms [[buffer(1)]],
+                                     constant InstanceUniforms *instanceUniforms [[buffer(2)]],
+                                     ushort vid [[vertex_id]],
+                                     ushort iid [[instance_id]])
+{
+    float4 position = vertices[vid].position;
+    float4x4 modelMatrix = instanceUniforms[iid].modelMatrix;
+    float4x4 normalMatrix = instanceUniforms[iid].normalMatrix;
+    
+    SkyVertOut outVert;
+    outVert.position = uniforms.viewProjectionMatrix * modelMatrix * position;
+    outVert.texCoords = position;
+    return outVert;
+}
+
+fragment half4 fragment_cube_lookup(SkyVertOut vert          [[stage_in]],
+                                    constant Uniforms &uniforms   [[buffer(0)]],
+                                    texturecube<half> cubeTexture [[texture(0)]],
+                                    sampler cubeSampler           [[sampler(0)]])
+{
+    float3 texCoords = float3(vert.texCoords.x, vert.texCoords.y, -vert.texCoords.z);
+    return cubeTexture.sample(cubeSampler, texCoords);
 }
