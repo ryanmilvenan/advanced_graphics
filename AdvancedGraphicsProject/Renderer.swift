@@ -248,7 +248,6 @@ class Renderer {
     
     func updateAngularVelocity(v:Float) {
         self.angularVelocity = v
-        print("Angular Velocity: \(self.angularVelocity)")
     }
     
     func reshape() {
