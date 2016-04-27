@@ -32,15 +32,9 @@ class MetalViewController: UIViewController, MTKViewDelegate {
                     guard let data = data else{
                         return
                     }
-                    
-                    
                     self.accelX = data.acceleration.x
                     self.accelY = data.acceleration.y
                     self.accelZ = data.acceleration.z
-                    print("X = \(data.acceleration.x)")
-                    print("Y = \(data.acceleration.y)")
-                    print("Z = \(data.acceleration.z)")
-                    
                 }
             )
         } else {
@@ -53,7 +47,7 @@ class MetalViewController: UIViewController, MTKViewDelegate {
     func updateMotion() {
 //        self.renderer.updateFrameDuration(Float((self.view as? MTKView).))
         
-        if let touch = (self.view as! MetalView).currentTouch {
+        if let touch = (self.view as! MetalView).lastTouch {
             let bounds:CGRect = self.view.bounds
             let rotationScale = (CGRectGetMidX(bounds) - touch.locationInView(self.view).x) / bounds.size.width
             

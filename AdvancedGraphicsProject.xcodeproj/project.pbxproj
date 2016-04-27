@@ -7,6 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		40021ADD1CD02EB400E4BCE7 /* rippled.png in Resources */ = {isa = PBXBuildFile; fileRef = 40021ADB1CD02EB400E4BCE7 /* rippled.png */; };
+		40021AE41CD02FFF00E4BCE7 /* cloudtop_bk.png in Resources */ = {isa = PBXBuildFile; fileRef = 40021ADE1CD02FFF00E4BCE7 /* cloudtop_bk.png */; };
+		40021AE51CD02FFF00E4BCE7 /* cloudtop_dn.png in Resources */ = {isa = PBXBuildFile; fileRef = 40021ADF1CD02FFF00E4BCE7 /* cloudtop_dn.png */; };
+		40021AE61CD02FFF00E4BCE7 /* cloudtop_ft.png in Resources */ = {isa = PBXBuildFile; fileRef = 40021AE01CD02FFF00E4BCE7 /* cloudtop_ft.png */; };
+		40021AE71CD02FFF00E4BCE7 /* cloudtop_lf.png in Resources */ = {isa = PBXBuildFile; fileRef = 40021AE11CD02FFF00E4BCE7 /* cloudtop_lf.png */; };
+		40021AE81CD02FFF00E4BCE7 /* cloudtop_rt.png in Resources */ = {isa = PBXBuildFile; fileRef = 40021AE21CD02FFF00E4BCE7 /* cloudtop_rt.png */; };
+		40021AE91CD02FFF00E4BCE7 /* cloudtop_up.png in Resources */ = {isa = PBXBuildFile; fileRef = 40021AE31CD02FFF00E4BCE7 /* cloudtop_up.png */; };
 		40437D7F1CC8743F00B8685F /* water.png in Resources */ = {isa = PBXBuildFile; fileRef = 40437D7D1CC8743F00B8685F /* water.png */; };
 		40437D851CC8759500B8685F /* Renderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40437D841CC8759500B8685F /* Renderer.swift */; };
 		40437D871CC8763500B8685F /* ShaderTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40437D861CC8763500B8685F /* ShaderTypes.swift */; };
@@ -25,7 +32,6 @@
 		A20AB2D71CBEDB24008DBB60 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = A20AB2D51CBEDB24008DBB60 /* LaunchScreen.storyboard */; };
 		A20AB2E21CBEDB25008DBB60 /* AdvancedGraphicsProjectTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20AB2E11CBEDB25008DBB60 /* AdvancedGraphicsProjectTests.swift */; };
 		A20AB2ED1CBEDB25008DBB60 /* AdvancedGraphicsProjectUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20AB2EC1CBEDB25008DBB60 /* AdvancedGraphicsProjectUITests.swift */; };
-		A26757CE1CC9FEB2001DC1D1 /* sand.png in Resources */ = {isa = PBXBuildFile; fileRef = A26757CD1CC9FEB2001DC1D1 /* sand.png */; };
 		A2C5505B1CCFE3DB004ED624 /* SkyboxMesh.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2C5505A1CCFE3DB004ED624 /* SkyboxMesh.swift */; };
 /* End PBXBuildFile section */
 
@@ -47,6 +53,13 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		40021ADB1CD02EB400E4BCE7 /* rippled.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = rippled.png; sourceTree = "<group>"; };
+		40021ADE1CD02FFF00E4BCE7 /* cloudtop_bk.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = cloudtop_bk.png; sourceTree = "<group>"; };
+		40021ADF1CD02FFF00E4BCE7 /* cloudtop_dn.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = cloudtop_dn.png; sourceTree = "<group>"; };
+		40021AE01CD02FFF00E4BCE7 /* cloudtop_ft.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = cloudtop_ft.png; sourceTree = "<group>"; };
+		40021AE11CD02FFF00E4BCE7 /* cloudtop_lf.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = cloudtop_lf.png; sourceTree = "<group>"; };
+		40021AE21CD02FFF00E4BCE7 /* cloudtop_rt.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = cloudtop_rt.png; sourceTree = "<group>"; };
+		40021AE31CD02FFF00E4BCE7 /* cloudtop_up.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = cloudtop_up.png; sourceTree = "<group>"; };
 		40437D7D1CC8743F00B8685F /* water.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = water.png; sourceTree = "<group>"; };
 		40437D841CC8759500B8685F /* Renderer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Renderer.swift; sourceTree = "<group>"; };
 		40437D861CC8763500B8685F /* ShaderTypes.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ShaderTypes.swift; sourceTree = "<group>"; };
@@ -71,13 +84,6 @@
 		A20AB2E81CBEDB25008DBB60 /* AdvancedGraphicsProjectUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AdvancedGraphicsProjectUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		A20AB2EC1CBEDB25008DBB60 /* AdvancedGraphicsProjectUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvancedGraphicsProjectUITests.swift; sourceTree = "<group>"; };
 		A20AB2EE1CBEDB25008DBB60 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		A26757CD1CC9FEB2001DC1D1 /* sand.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = sand.png; sourceTree = "<group>"; };
-		A2C550541CCFDE02004ED624 /* desertsky_bk.tga */ = {isa = PBXFileReference; lastKnownFileType = file; path = desertsky_bk.tga; sourceTree = "<group>"; };
-		A2C550551CCFDE02004ED624 /* desertsky_dn.tga */ = {isa = PBXFileReference; lastKnownFileType = file; path = desertsky_dn.tga; sourceTree = "<group>"; };
-		A2C550561CCFDE02004ED624 /* desertsky_ft.tga */ = {isa = PBXFileReference; lastKnownFileType = file; path = desertsky_ft.tga; sourceTree = "<group>"; };
-		A2C550571CCFDE02004ED624 /* desertsky_lf.tga */ = {isa = PBXFileReference; lastKnownFileType = file; path = desertsky_lf.tga; sourceTree = "<group>"; };
-		A2C550581CCFDE02004ED624 /* desertsky_rt.tga */ = {isa = PBXFileReference; lastKnownFileType = file; path = desertsky_rt.tga; sourceTree = "<group>"; };
-		A2C550591CCFDE02004ED624 /* desertsky_up.tga */ = {isa = PBXFileReference; lastKnownFileType = file; path = desertsky_up.tga; sourceTree = "<group>"; };
 		A2C5505A1CCFE3DB004ED624 /* SkyboxMesh.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SkyboxMesh.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -109,13 +115,13 @@
 		40437D7B1CC873F300B8685F /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				A2C550541CCFDE02004ED624 /* desertsky_bk.tga */,
-				A2C550551CCFDE02004ED624 /* desertsky_dn.tga */,
-				A2C550561CCFDE02004ED624 /* desertsky_ft.tga */,
-				A2C550571CCFDE02004ED624 /* desertsky_lf.tga */,
-				A2C550581CCFDE02004ED624 /* desertsky_rt.tga */,
-				A2C550591CCFDE02004ED624 /* desertsky_up.tga */,
-				A26757CD1CC9FEB2001DC1D1 /* sand.png */,
+				40021ADE1CD02FFF00E4BCE7 /* cloudtop_bk.png */,
+				40021ADF1CD02FFF00E4BCE7 /* cloudtop_dn.png */,
+				40021AE01CD02FFF00E4BCE7 /* cloudtop_ft.png */,
+				40021AE11CD02FFF00E4BCE7 /* cloudtop_lf.png */,
+				40021AE21CD02FFF00E4BCE7 /* cloudtop_rt.png */,
+				40021AE31CD02FFF00E4BCE7 /* cloudtop_up.png */,
+				40021ADB1CD02EB400E4BCE7 /* rippled.png */,
 				40437D7D1CC8743F00B8685F /* water.png */,
 			);
 			name = Resources;
@@ -307,11 +313,17 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				40021AE41CD02FFF00E4BCE7 /* cloudtop_bk.png in Resources */,
+				40021AE81CD02FFF00E4BCE7 /* cloudtop_rt.png in Resources */,
 				A20AB2D71CBEDB24008DBB60 /* LaunchScreen.storyboard in Resources */,
-				A26757CE1CC9FEB2001DC1D1 /* sand.png in Resources */,
+				40021AE71CD02FFF00E4BCE7 /* cloudtop_lf.png in Resources */,
 				A20AB2D41CBEDB24008DBB60 /* Assets.xcassets in Resources */,
+				40021AE91CD02FFF00E4BCE7 /* cloudtop_up.png in Resources */,
 				A20AB2D21CBEDB24008DBB60 /* Main.storyboard in Resources */,
 				40437D7F1CC8743F00B8685F /* water.png in Resources */,
+				40021AE51CD02FFF00E4BCE7 /* cloudtop_dn.png in Resources */,
+				40021ADD1CD02EB400E4BCE7 /* rippled.png in Resources */,
+				40021AE61CD02FFF00E4BCE7 /* cloudtop_ft.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

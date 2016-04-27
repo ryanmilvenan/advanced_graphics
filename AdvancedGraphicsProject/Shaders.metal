@@ -20,7 +20,7 @@ struct Vertex
     float2 texCoords [[attribute(3)]];
 };
 
-struct ProjectedVertex
+struct VertexOut
 {
     float4 position [[position]];
     float4 normal;
@@ -51,7 +51,7 @@ struct InstanceUniforms
     float4x4 normalMatrix;
 };
 
-vertex ProjectedVertex vertexShader(constant Vertex *vertices [[buffer(0)]],
+vertex VertexOut vertexShader(constant Vertex *vertices [[buffer(0)]],
                                       constant Uniforms &uniforms [[buffer(1)]],
                                       constant InstanceUniforms *instanceUniforms [[buffer(2)]],
                                       ushort vid [[vertex_id]],
@@ -60,7 +60,7 @@ vertex ProjectedVertex vertexShader(constant Vertex *vertices [[buffer(0)]],
     float4x4 modelMatrix = instanceUniforms[iid].modelMatrix;
     float4x4 normalMatrix = instanceUniforms[iid].normalMatrix;
     
-    ProjectedVertex outVert;
+    VertexOut outVert;
     outVert.position = uniforms.viewProjectionMatrix * modelMatrix * float4(vertices[vid].position);
     outVert.normal = normalMatrix * float4(vertices[vid].normal);
     outVert.diffuseColor = vertices[vid].diffuseColor;
@@ -69,12 +69,16 @@ vertex ProjectedVertex vertexShader(constant Vertex *vertices [[buffer(0)]],
     return outVert;
 }
 
-fragment half4 fragmentShader(ProjectedVertex vert [[stage_in]],
+fragment half4 fragmentShader(VertexOut vert [[stage_in]],
                                 texture2d<float, access::sample> texture [[texture(0)]],
                                 sampler texSampler [[sampler(0)]])
 {
     float4 vertexColor = vert.diffuseColor;
+    if(vertexColor.a <= 0.05) {
+        discard_fragment();
+    }
     float4 textureColor = texture.sample(texSampler, vert.texCoords);
+
     
     float diffuseIntensity = max(kMinDiffuseIntensity, dot(normalize(vert.normal.xyz), -kLightDirection));
     float4 color = diffuseIntensity * textureColor * vertexColor;

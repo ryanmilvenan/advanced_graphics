@@ -12,42 +12,25 @@ import MetalKit
 
 class MetalView: MTKView {
     
-    var currentTouch:UITouch? = nil
+    var lastTouch:UITouch? = nil
     
     override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?) {
         if let touch = touches.first {
-            currentTouch = touch
+            lastTouch = touch
         }
     }
     
     override func touchesEnded(touches: Set<UITouch>, withEvent event: UIEvent?) {
-        currentTouch = nil
+        lastTouch = nil
     }
     
     override func touchesCancelled(touches: Set<UITouch>?, withEvent event: UIEvent?) {
-        currentTouch = nil
+        lastTouch = nil
     }
     
     override func touchesMoved(touches: Set<UITouch>, withEvent event: UIEvent?) {
         if let touch = touches.first {
-            currentTouch = touch
+            lastTouch = touch
         }
     }
-    
-//    override var frame: CGRect {
-//        didSet(frame) {
-//            super.frame = frame
-//            var scale:CGFloat = UIScreen.mainScreen().scale
-//            
-//            if let window = self.window {
-//                scale = window.screen.scale
-//            }
-//            
-//            var drawableSize:CGSize = self.bounds.size
-//            drawableSize.width *= scale
-//            drawableSize.height *= scale
-//            
-//            self.metalLayer().drawableSize = drawableSize
-//        }
-//    }
 }

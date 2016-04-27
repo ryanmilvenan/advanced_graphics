@@ -24,7 +24,6 @@ class WaterMesh: Mesh {
     
     func generateBuffers(width:Float, depth:Float, divX:Int, divZ:Int, texScale:Float, opacity:Float, device:MTLDevice) {
         let vertexCount:size_t = (divX + 1) * (divZ + 1)
-        //let indexCount:size_t = divX * divZ * 6
         
         for _ in 0 ..< vertexCount {
             let pos = float4(0, 0, 0, 0)

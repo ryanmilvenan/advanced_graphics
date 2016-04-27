@@ -55,16 +55,12 @@ class Skybox: Mesh {
     ]
     
     var device:MTLDevice! = nil
+    var pipelineState:MTLRenderPipelineState! = nil
+    var depthState:MTLDepthStencilState! = nil
     
     init(device:MTLDevice) {
         self.device = device
         super.init()
-        
-        self.vertexBuffer = device.newBufferWithBytes(vertices, length: 24 * 8 * sizeof(Float), options: [])
-        self.indexBuffer = device.newBufferWithBytes(indices, length: 36 * sizeof(Index), options: [])
-    }
-    
-    func getPipeline() -> MTLRenderPipelineState? {
         
         let vertexDescriptor:MTLVertexDescriptor = MTLVertexDescriptor()
         vertexDescriptor.attributes[0].format = MTLVertexFormat.Float4
@@ -87,13 +83,20 @@ class Skybox: Mesh {
         pipelineDescriptor.colorAttachments[0].pixelFormat = MTLPixelFormat.BGRA8Unorm
         pipelineDescriptor.depthAttachmentPixelFormat = MTLPixelFormat.Depth32Float
         
-        var pipelineState:MTLRenderPipelineState? = nil
         do {
-            try pipelineState = device.newRenderPipelineStateWithDescriptor(pipelineDescriptor)
+            self.pipelineState = try device.newRenderPipelineStateWithDescriptor(pipelineDescriptor)
         } catch let error {
             print("Failed to create pipeline state, error \(error)")
         }
         
-        return pipelineState
+        let depthDescriptor:MTLDepthStencilDescriptor = MTLDepthStencilDescriptor()
+        depthDescriptor.depthCompareFunction = MTLCompareFunction.Less
+        depthDescriptor.depthWriteEnabled = false
+        
+        self.depthState = self.device.newDepthStencilStateWithDescriptor(depthDescriptor)
+        
+        self.vertexBuffer = device.newBufferWithBytes(vertices, length: 24 * 8 * sizeof(Float), options: [])
+        self.indexBuffer = device.newBufferWithBytes(indices, length: 36 * sizeof(Index), options: [])
     }
+    
 }

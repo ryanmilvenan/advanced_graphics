@@ -11,7 +11,6 @@ import Darwin
 import Metal
 import simd
 
-let colorWhite:vector_float4 = vector_float4(1, 1, 1, 1)
 let texScale:Float = 50
 
 class TerrainMesh:Mesh {
@@ -90,10 +89,10 @@ class TerrainMesh:Mesh {
         self.computeMeshNormals()
         self.generateIndices()
         
-        self.vertexBuffer = device.newBufferWithBytes(self.vertices, length: sizeof(Vertex) * self.vertexCount, options: MTLResourceOptions.OptionCPUCacheModeDefault)
+        self.vertexBuffer = device.newBufferWithBytes(self.vertices, length: sizeof(Vertex) * self.vertexCount, options: MTLResourceOptions.CPUCacheModeDefaultCache)
         self.vertexBuffer.label = "Vertices (Terrain)"
         
-        self.indexBuffer = device.newBufferWithBytes(self.indices, length: sizeof(Index) * self.indexCount, options: MTLResourceOptions.OptionCPUCacheModeDefault)
+        self.indexBuffer = device.newBufferWithBytes(self.indices, length: sizeof(Index) * self.indexCount, options: MTLResourceOptions.CPUCacheModeDefaultCache)
         self.indexBuffer.label = "Indices (Terrain)"
     }
     
@@ -156,7 +155,7 @@ class TerrainMesh:Mesh {
                 let s:Float = (Float(column) / Float((self.stride - 1))) * texScale
                 let t:Float = (Float(row) / Float((self.stride - 1))) * texScale
                 self.vertices[index].texCoords = float2(s, t)
-                self.vertices[index].diffuseColor = colorWhite
+                self.vertices[index].diffuseColor = vector4(1, 1, 1, 1)
             }
         }
     }
