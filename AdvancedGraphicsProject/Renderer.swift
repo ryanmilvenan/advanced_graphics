@@ -68,6 +68,7 @@ class Renderer {
         self.reshape()
     }
     
+    //Initialize metal as much as possible
     func setupMetal() {
         self.device = MTLCreateSystemDefaultDevice()
         guard device != nil else {
@@ -103,6 +104,7 @@ class Renderer {
         self.populateWaterUniforms()
     }
     
+    //Create all the neccessary geometry for the meshes
     func loadMeshes() {
         self.skyboxMesh = Skybox(device: self.device)
         
@@ -111,6 +113,7 @@ class Renderer {
         self.waterMesh = WaterMesh(width: terrainSize, depth: terrainSize, divX: 32, divZ: 32, texScale: 10, opacity: 0.20, device: self.device)
     }
     
+    //Load textures for all the meshes
     func loadTextures() {
         let textureLoader:TextureLoader = TextureLoader.sharedInstance
         
@@ -134,12 +137,14 @@ class Renderer {
         
     }
     
+    //Create the uniform buffer with enough size to hold data relating to the terrain, water, and skybox
     func buildUniformBuffer() {
         let uniformBufferLength = waterUniformOffset + sizeof(InstanceUniforms)
         self.uniformBuffer = self.device.newBufferWithLength(uniformBufferLength, options: MTLResourceOptions.CPUCacheModeDefaultCache)
         self.uniformBuffer.label = "Uniforms"
     }
     
+    //Populate the uniform buffer with the data associated with the skybox
     func populateSkyboxUniforms() {
         let Z:float3 = float3(0, 0, 1)
         let skyboxModelMatrix:float4x4 = scalingMatrix(100.0) * rotationMatrix(Float(M_PI), Z) * matrix_identity()
@@ -148,6 +153,7 @@ class Renderer {
         memcpy(self.uniformBuffer.contents() + skyboxUniformOffset, &skyboxUniforms, sizeof(InstanceUniforms))
     }
     
+    //Pouplate the uniform buffer with the data associated with the terrain mesh
     func populateTerrainUniforms() {
         let terrainModelMatrix:float4x4 = matrix_identity()
         let terrainNormalMatrix = terrainModelMatrix.transpose.inverse
@@ -155,6 +161,7 @@ class Renderer {
         memcpy(self.uniformBuffer.contents() + terrainUniformOffset, &terrainUniforms, sizeof(InstanceUniforms))
     }
     
+    //Populate the uniform buffer with the data associated with the water mesh
     func populateWaterUniforms() {
         let waterOffsetVec:float3 = float3(0, waterLevel, 0)
         let waterModelMatrix = translationMatrix(waterOffsetVec)
@@ -164,6 +171,7 @@ class Renderer {
         memcpy(self.uniformBuffer.contents() + waterUniformOffset, &waterUniforms, sizeof(InstanceUniforms))
     }
     
+    //Make sure the camera sticks to the ground and can't go below it
     func constrainToTerrain(position:float3) -> float3 {
         var newPosition:float3 = position
         let halfWidth:Float = (self.terrainMesh as! TerrainMesh).width * 0.5
@@ -190,6 +198,7 @@ class Renderer {
         return newPosition
     }
     
+    //Update the camera's position based on user input, update the viewProjection matrix accordingly
     func updateCamera() {
         var camPosition:float3 = self.cameraPosition
         
@@ -207,6 +216,7 @@ class Renderer {
         memcpy(self.uniformBuffer.contents() + sharedUniformOffset, &uniforms, sizeof(Uniforms))
     }
     
+    //Build depth texture
     func buildDepthTexture() {
         let drawableSize:CGSize = self.mtkView.drawableSize
         let descriptor:MTLTextureDescriptor = MTLTextureDescriptor.texture2DDescriptorWithPixelFormat(MTLPixelFormat.Depth32Float, width: Int(drawableSize.width), height: Int(drawableSize.height), mipmapped: false)
@@ -214,6 +224,7 @@ class Renderer {
         self.depthTexture.label = "Depth Texture"
     }
     
+    //Draw a mesh
     func drawInstancedMesh(mesh:Mesh, encoder:MTLRenderCommandEncoder, material:Material, instanceCount:Int) {
         encoder.setRenderPipelineState(material.pipelineState)
         encoder.setDepthStencilState(material.depthState)
@@ -223,9 +234,8 @@ class Renderer {
         encoder.drawIndexedPrimitives(MTLPrimitiveType.Triangle, indexCount: mesh.indexBuffer.length / sizeof(Index), indexType: MTLIndexType.UInt16, indexBuffer: mesh.indexBuffer, indexBufferOffset: 0, instanceCount: instanceCount)
     }
     
+    //Draw the skybox
     func drawSkybox(encoder:MTLRenderCommandEncoder) {
-
-        
         encoder.setRenderPipelineState(self.skyboxMesh.pipelineState)
         encoder.setDepthStencilState(self.skyboxMesh.depthState)
         encoder.setVertexBuffer(self.skyboxMesh.vertexBuffer, offset: 0, atIndex: 0)
@@ -234,7 +244,6 @@ class Renderer {
         encoder.setFragmentBuffer(self.uniformBuffer, offset: sharedUniformOffset, atIndex: 0)
         encoder.setFragmentTexture(self.skyboxTexture, atIndex: 0)
         encoder.setFragmentSamplerState(self.sampler, atIndex: 0)
-        
         encoder.drawIndexedPrimitives(.Triangle, indexCount: self.skyboxMesh.indexBuffer.length / sizeof(Index), indexType: MTLIndexType.UInt16, indexBuffer: self.skyboxMesh.indexBuffer, indexBufferOffset: 0, instanceCount: 1)
     }
     
@@ -249,7 +258,8 @@ class Renderer {
     func updateAngularVelocity(v:Float) {
         self.angularVelocity = v
     }
-    
+
+    //Update view/projection matrix based on a change in orientation or initialization
     func reshape() {
         self.viewMatrix = createViewMatrix()
         if let drawable = self.mtkView.currentDrawable {
@@ -259,13 +269,14 @@ class Renderer {
         }
     }
     
+    //Create a view matrix adjusted for camera height
     func createViewMatrix() -> float4x4 {
-        let Y:vector_float3 = vector_float3(0, 1, 0)
+        let Y:vector_float3 = float3(0, 1, 0)
         let cameraPosition = self.cameraPosition
         return rotationMatrix(self.cameraHeading, Y) * translationMatrix(-cameraPosition)
     }
     
-    
+    //Draw the scene
     func draw() {
         self.updateCamera()
         

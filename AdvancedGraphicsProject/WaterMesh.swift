@@ -18,11 +18,12 @@ class WaterMesh: Mesh {
         self.vertices = []
         self.indices = []
         super.init()
-        self.name = "Plane Mesh"
-        self.generateBuffers(width, depth: depth, divX: divX, divZ: divZ, texScale: texScale, opacity: opacity, device: device)
+        self.name = "Water Mesh"
+        self.initBuffers(width, depth: depth, divX: divX, divZ: divZ, texScale: texScale, opacity: opacity, device: device)
     }
     
-    func generateBuffers(width:Float, depth:Float, divX:Int, divZ:Int, texScale:Float, opacity:Float, device:MTLDevice) {
+    //Generate the water vertices, and determine their texture coordinates based on the provided number of repetitions of the texture
+    func initBuffers(width:Float, depth:Float, divX:Int, divZ:Int, texScale:Float, opacity:Float, device:MTLDevice) {
         let vertexCount:size_t = (divX + 1) * (divZ + 1)
         
         for _ in 0 ..< vertexCount {

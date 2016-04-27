@@ -45,6 +45,7 @@ class TerrainMesh:Mesh {
         self.generateTerrain()
     }
     
+    //Generate the vertices for the terrain and perform a diamond-square algorithm to determine their final position
     func generateTerrain() {
         let shiftBits:UInt16 = 1
         self.stride = Int((shiftBits << self.iterations) + 1)
@@ -196,6 +197,7 @@ class TerrainMesh:Mesh {
         }
     }
     
+    //Esitmate the height at a provided position based on a bilinear interpolation of the neighboring vertices
     func heightAtPositionX(x:Float, z:Float) -> Float {
         let halfSize = self.width / 2
         
